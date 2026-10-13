@@ -1,0 +1,14 @@
+{
+  "name": "izzyma",
+  "short_name": "izzyma",
+  "description": "준비물과 할 일을 빠뜨리지 않게 챙겨 주는 개인용 체크리스트",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff6fa",
+  "theme_color": "#ffe7f0",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

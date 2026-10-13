@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>izzyma — 규칙 검증</title>
+  <style>
+    body { font: 15px/1.6 system-ui, "Malgun Gothic", sans-serif; max-width: 780px; margin: 24px auto; padding: 0 16px; }
+    h1 { font-size: 20px; } li { margin: 4px 0; }
+    .ok { color: #217a4a; } .bad { color: #c0392b; font-weight: 700; }
+    #summary { font-weight: 700; margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>규칙 검증 (storage.js)</h1>
+  <p>체크리스트 진행률, 체크 초기화, 틀, 할 일 정렬·마감 표시, 알림 대상, 내보내기·가져오기를 확인합니다.</p>
+  <div id="summary">실행 중…</div>
+  <ul id="out"></ul>
+  <script src="storage.js"></script>
+  <script>
+    (function () {
+      const Z = window.Izzyma;
+      const out = document.getElementById('out');
+      let pass = 0, fail = 0;
+      const eq = (name, got, want) => {
+        const ok = JSON.stringify(got) === JSON.stringify(want);
+        ok ? pass++ : fail++;
+        const li = document.createElement('li');
+        li.className = ok ? 'ok' : 'bad';
+        li.textContent = (ok ? '통과 ' : '실패 ') + name + (ok ? '' : ' — 기대 ' + JSON.stringify(want) + ', 실제 ' + JSON.stringify(got));
+        out.appendChild(li);
+      };
+
+      // 체크리스트 진행률과 초기화
+      const l = Z.makeList('외출 준비물', '🎒', ['지갑', '우산', '충전기']);
+      eq('새 목록은 모두 비어 있음', Z.progress(l), { done: 0, total: 3, complete: false });
+      l.items[0].done = true; l.items[1].done = true;
+      eq('2/3 진행', Z.progress(l), { done: 2, total: 3, complete: false });
+      l.items[2].done = true;
+      eq('모두 체크하면 완료', Z.progress(l).complete, true);
+      Z.resetChecks(l);
+      eq('체크 초기화', Z.progress(l), { done: 0, total: 3, complete: false });
+      eq('빈 목록은 완료가 아님', Z.progress(Z.makeList('빈', '📝', [])).complete, false);
+
+      // 틀: 저장하고 불러오면 체크가 비어 있는 새 목록
+      l.items[0].done = true;
+      const tpl = Z.listToTemplate(l);
+      eq('틀에는 항목 글만 들어감', tpl.items, ['지갑', '우산', '충전기']);
+      const l2 = Z.templateToList(tpl);
+      eq('틀로 만든 목록은 체크가 비어 있음', Z.progress(l2).done, 0);
+      eq('틀로 만든 목록은 새 id', l2.id !== l.id, true);
+
+      // 할 일 정렬: 안 끝난 것 먼저, 마감 임박순, 마감 없는 것은 마감 있는 것 뒤, 끝낸 것은 맨 아래
+      const T = (id, due, remind, done) => ({ id, title: id, due, remind: remind || '', done: !!done });
+      const sorted = Z.sortTasks([T('c', ''), T('b', '2026-10-14', '09:00'), T('d', '2026-10-13', '', true), T('a', '2026-10-13', '08:00'), T('e', '2026-10-13', '18:00')]);
+      eq('할 일 정렬', sorted.map((t) => t.id), ['a', 'e', 'b', 'c', 'd']);
+
+      // 마감 표시
+      eq('오늘', Z.dueLabel(T('x', '2026-10-13'), '2026-10-13'), '오늘');
+      eq('내일', Z.dueLabel(T('x', '2026-10-14'), '2026-10-13'), '내일');
+      eq('3일 남음', Z.dueLabel(T('x', '2026-10-16'), '2026-10-13'), '3일 남음');
+      eq('2일 지남', Z.dueLabel(T('x', '2026-10-11'), '2026-10-13'), '2일 지남');
+      eq('월 경계(10/31→11/2)', Z.dueLabel(T('x', '2026-11-02'), '2026-10-31'), '2일 남음');
+      eq('마감 없음', Z.dueLabel(T('x', ''), '2026-10-13'), '');
+      eq('지난 할 일', Z.isOverdue(T('x', '2026-10-12'), '2026-10-13'), true);
+      eq('끝낸 할 일은 지난 것이 아님', Z.isOverdue(T('x', '2026-10-12', '', true), '2026-10-13'), false);
+
+      // 알림 대상: 오늘, 시각이 지났고, 아직 안 알린 것만. 같은 시각엔 한 번만.
+      const at = (h, m) => new Date(2026, 9, 13, h, m);
+      const tasks = [T('r1', '2026-10-13', '09:00'), T('r2', '2026-10-13', '15:00'), T('r3', '2026-10-14', '09:00'), T('r4', '2026-10-13', '08:00', true), T('r5', '2026-10-13', '')];
+      eq('10:00에 알릴 것', Z.dueReminders(tasks, at(10, 0)).map((t) => t.id), ['r1']);
+      eq('16:00에 알릴 것', Z.dueReminders(tasks, at(16, 0)).map((t) => t.id), ['r1', 'r2']);
+      tasks[0].notified = '2026-10-13 09:00';
+      eq('이미 알린 것은 제외', Z.dueReminders(tasks, at(16, 0)).map((t) => t.id), ['r2']);
+
+      // 내보내기·가져오기
+      const data = { v: 1, lists: [l], tasks: [T('t', '2026-10-13')], templates: [tpl] };
+      const back = Z.importJson(Z.exportJson(data));
+      eq('내보낸 글을 다시 가져옴', back.ok && back.data.lists[0].name, '외출 준비물');
+      eq('깨진 글 거부', Z.importJson('{{').ok, false);
+      eq('다른 형식 거부', Z.importJson('{"a":1}').ok, false);
+
+      const s = document.getElementById('summary');
+      s.textContent = fail === 0 ? '전체 통과 (' + pass + '건)' : '실패 ' + fail + '건 / 통과 ' + pass + '건';
+      s.className = fail === 0 ? 'ok' : 'bad';
+      document.title = (fail === 0 ? 'PASS ' : 'FAIL ') + pass + '/' + (pass + fail);
+    })();
+  </script>
+</body>
+</html>

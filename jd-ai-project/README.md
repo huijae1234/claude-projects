@@ -87,6 +87,10 @@ npm run dev:web      # 화면 (터미널 2) → http://localhost:5173
 
 로그인 없이 화면만 보려면 `npm run dev:demo`를 서버 대신 실행하세요(가짜 응답, 화면 상단에 "데모 모드" 표시).
 
+### 웹에서 바로 보기 (설치 불필요)
+
+**https://huijae1234.github.io/food-ai-workbench/** 에서 열립니다. 샘플 입력의 AI 결과는 미리 실행해 둔 실제 Claude 응답이고, 숫자 계산·관리도·검증은 브라우저에서 다시 실행됩니다. 직접 입력한 내용의 AI 분석은 아래처럼 로컬에서 실행해야 합니다(Claude 로그인을 쓰는 구조라서 공개 서버로는 돌리지 않습니다).
+
 ### 링크로 열 수 있는 단일 파일 버전
 
 `npm run build:artifact`로 서버 없이 도는 HTML 파일 하나를 만들 수 있습니다. 같은 도구 코드가 브라우저에서 실행되고, 샘플 입력의 AI 응답은 **미리 실행해 둔 실제 Claude 응답**을 보여줍니다([app/README.md](app/README.md)).

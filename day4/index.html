@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>마감 한눈에</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>마감 한눈에</h1>
+      <p class="sub">흩어진 채용 마감을 주말·공휴일을 뺀 <b>실제 남은 영업일</b>로 모아 봅니다.</p>
+    </div>
+    <div class="now" aria-live="polite">오늘 <span id="today">-</span></div>
+  </header>
+
+  <main>
+    <section class="panel" aria-labelledby="form-title">
+      <h2 id="form-title">공고 추가</h2>
+      <form id="entry-form" novalidate>
+        <label class="wide">회사·공고명
+          <input id="company" type="text" maxlength="80" autocomplete="off" placeholder="예: OO식품 생산관리 신입">
+        </label>
+        <label>사이트
+          <select id="site"></select>
+        </label>
+        <label>마감 표기 방식
+          <select id="type"></select>
+        </label>
+        <label id="f-date">마감 날짜
+          <input id="date" type="date">
+        </label>
+        <label id="f-time">마감 시각 <small>(비우면 23:59)</small>
+          <input id="time" type="time">
+        </label>
+        <label id="f-dminus" hidden>D- 몇 일
+          <input id="dminus" type="number" min="0" max="365" step="1" inputmode="numeric" placeholder="예: 3">
+          <small>오늘을 기준으로 마감 날짜로 바꿔 저장합니다.</small>
+        </label>
+        <label id="f-submit">내 서류 제출 목표일 <small>(비우면 마감 바로 앞 영업일을 제안)</small>
+          <input id="submit-date" type="date">
+        </label>
+        <label>상태
+          <select id="status"></select>
+        </label>
+        <div class="actions wide">
+          <button id="submit-btn" type="submit" class="primary">추가</button>
+          <button id="cancel-edit" type="button" hidden>수정 취소</button>
+          <button id="add-examples" type="button" class="ghost">예시 5건으로 구경하기</button>
+          <button id="clear-examples" type="button" class="ghost" hidden>예시 지우기</button>
+        </div>
+        <p id="msg" class="msg" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section aria-labelledby="list-title">
+      <div class="list-head">
+        <h2 id="list-title">임박순 목록</h2>
+        <div id="summary" class="chips"></div>
+      </div>
+      <ul id="list" class="cards"></ul>
+    </section>
+  </main>
+
+  <footer id="foot" class="foot"></footer>
+
+  <script src="rules.js"></script>
+  <script src="api.js"></script>
+  <script src="render.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

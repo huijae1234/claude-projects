@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>izzyma</title>
+<style>
+  :root {
+    --bg: #fff8f3; --card: #ffffff; --ink: #4a3f45; --muted: #a89aa2;
+    --pink: #ff9eb5; --mint: #a8e6cf; --lemon: #ffe58f; --line: #f3e6e0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", "Malgun Gothic", system-ui, sans-serif; }
+  .app { max-width: 960px; margin: 0 auto; padding: 20px 16px 96px; }
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .logo { font-size: 26px; font-weight: 800; color: var(--pink); letter-spacing: -0.5px; }
+  .logo small { font-size: 14px; color: var(--muted); font-weight: 500; margin-left: 6px; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--lemon);
+    display: grid; place-items: center; font-weight: 700; }
+  .layout { display: grid; gap: 16px; }
+  @media (min-width: 760px) { .layout { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--card); border-radius: 22px; padding: 18px;
+    box-shadow: 0 4px 14px rgba(255,158,181,.15); }
+  h2 { margin: 0 0 12px; font-size: 17px; display: flex; justify-content: space-between; }
+  h2 span { color: var(--pink); font-size: 14px; }
+  .task { display: flex; align-items: center; gap: 12px; padding: 12px 4px;
+    border-bottom: 1px dashed var(--line); cursor: pointer; }
+  .task:last-child { border-bottom: 0; }
+  .box { width: 26px; height: 26px; border-radius: 9px; border: 2.5px solid var(--pink);
+    flex: none; display: grid; place-items: center; color: #fff; font-size: 15px; transition: .15s; }
+  .task.done .box { background: var(--pink); transform: scale(1.1); }
+  .task.done .t { text-decoration: line-through; color: var(--muted); }
+  .t { flex: 1; font-size: 16px; }
+  .due { font-size: 12px; color: var(--muted); background: var(--bg);
+    padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+  .due.soon { background: var(--lemon); color: #8a6d00; }
+  .list { display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px; border-radius: 16px; margin-bottom: 10px; font-weight: 600; }
+  .list:nth-of-type(1) { background: #ffe9ee; } .list:nth-of-type(2) { background: #e3f7ee; }
+  .bar { height: 7px; border-radius: 9px; background: rgba(255,255,255,.8); margin-top: 8px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--pink); border-radius: 9px; }
+  .new { width: 100%; padding: 13px; border: 2px dashed var(--pink); background: none;
+    color: var(--pink); border-radius: 16px; font: 700 15px inherit; cursor: pointer; }
+  .fab { position: fixed; right: 20px; bottom: 22px; border: 0; background: var(--pink); color: #fff;
+    font: 800 16px inherit; padding: 15px 22px; border-radius: 99px;
+    box-shadow: 0 8px 20px rgba(255,158,181,.5); cursor: pointer; }
+  .hint { text-align: center; color: var(--muted); font-size: 12px; margin-top: 18px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">izzyma<small>깜빡하지 않게 챙겨줄게요</small></div>
+    <div class="avatar">나</div>
+  </header>
+
+  <div class="layout">
+    <section class="card">
+      <h2>오늘 할 일 <span id="count"></span></h2>
+      <div id="tasks"></div>
+    </section>
+
+    <section class="card">
+      <h2>내 체크리스트</h2>
+      <div class="list">외출 준비물 <span>4/6</span></div>
+      <div class="list">여행 짐 <span>0/12</span></div>
+      <button class="new">+ 새로 만들기</button>
+    </section>
+  </div>
+
+  <p class="hint">시안입니다. 체크 칸을 눌러 보세요.</p>
+</div>
+<button class="fab">+ 할 일</button>
+
+<script>
+  const tasks = [
+    { t: "병원 예약 전화", due: "오늘 14:00 🔔", soon: true, done: false },
+    { t: "택배 보내기", due: "오늘", soon: true, done: false },
+    { t: "우산 챙기기", due: "내일", soon: false, done: false },
+    { t: "약 먹기", due: "", soon: false, done: true },
+  ];
+  const el = document.getElementById("tasks");
+  function render() {
+    el.innerHTML = "";
+    tasks.forEach((k, i) => {
+      const d = document.createElement("div");
+      d.className = "task" + (k.done ? " done" : "");
+      d.innerHTML = '<div class="box">' + (k.done ? "✓" : "") + '</div><div class="t">' + k.t + "</div>" +
+        (k.due ? '<div class="due' + (k.soon ? " soon" : "") + '">' + k.due + "</div>" : "");
+      d.onclick = () => { k.done = !k.done; render(); };
+      el.appendChild(d);
+    });
+    document.getElementById("count").textContent = tasks.filter(k => k.done).length + "/" + tasks.length;
+  }
+  render();
+</script>
+</body>
+</html>

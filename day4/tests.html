@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>마감 한눈에 — 규칙 검증</title>
+  <style>
+    body { font: 15px/1.6 system-ui, "Malgun Gothic", sans-serif; max-width: 780px; margin: 24px auto; padding: 0 16px; }
+    h1 { font-size: 20px; }
+    li { margin: 4px 0; }
+    .ok { color: #217a4a; } .bad { color: #c0392b; font-weight: 700; }
+    #summary { font-weight: 700; margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>규칙 검증 (rules.js)</h1>
+  <p>고정 파일(fixtures/)의 실제 공휴일 응답으로 rules.js의 계산을 확인합니다. 인터넷이 필요 없습니다.</p>
+  <div id="summary">실행 중…</div>
+  <ul id="out"></ul>
+  <script src="rules.js"></script>
+  <script>
+    (async function () {
+      const R = window.Rules;
+      const load = async (y) => (await (await fetch('fixtures/holidays-' + y + '-KR.json')).json());
+      const hol = R.holidayMap([].concat(await load(2026), await load(2027)));
+      const out = document.getElementById('out');
+      let pass = 0, fail = 0;
+      const eq = (name, got, want) => {
+        const ok = JSON.stringify(got) === JSON.stringify(want);
+        ok ? pass++ : fail++;
+        const li = document.createElement('li');
+        li.className = ok ? 'ok' : 'bad';
+        li.textContent = (ok ? '통과 ' : '실패 ') + name + (ok ? '' : ' — 기대 ' + JSON.stringify(want) + ', 실제 ' + JSON.stringify(got));
+        out.appendChild(li);
+      };
+      const now = (ymd, hm) => ({ ymd, hm: hm || '09:00', fixed: true });
+
+      // 기획서의 예: 오늘 10/7, 마감 10/12 → 달력 5일, 영업일 2일, 한글날(10/9) 제외
+      const a = R.analyze({ id: 'a', type: 'datetime', date: '2026-10-12', time: '18:00' }, now('2026-10-07'), hol);
+      eq('10/7→10/12 달력 일수', a.calendarDays, 5);
+      eq('10/7→10/12 영업일(한글날 제외)', a.businessDays, 2);
+      eq('10/7→10/12 제외된 공휴일 이름', a.skippedHolidays.map((h) => h.name), ['한글날']);
+      eq('10/7→10/12 주말 제외 일수', a.weekendDays, 2);
+      eq('10/7→10/12 신호등', a.tone, 'orange');
+      eq('10/7→10/12 설명 문구', a.detail.indexOf('달력으로는 5일') === 0 && a.detail.indexOf('한글날(10/9)') > 0 && a.detail.indexOf('영업일로는 2일') > 0, true);
+
+      // 오늘이 공휴일(10/9)인 날, 다음 영업일(10/12)이 마감
+      eq('오늘이 공휴일: 10/9→10/12 영업일', R.analyze({ id: 'b', type: 'datetime', date: '2026-10-12', time: '18:00' }, now('2026-10-09'), hol).businessDays, 1);
+
+      // 마감 시각 전/후
+      eq('오늘 마감, 시각 전', R.analyze({ id: 'c', type: 'datetime', date: '2026-10-07', time: '18:00' }, now('2026-10-07', '09:00'), hol).badge, '오늘 마감');
+      eq('오늘 마감, 시각 후', R.analyze({ id: 'd', type: 'datetime', date: '2026-10-07', time: '18:00' }, now('2026-10-07', '18:30'), hol).badge, '마감됨');
+      eq('어제 마감', R.analyze({ id: 'e', type: 'datetime', date: '2026-10-06', time: '23:59' }, now('2026-10-07'), hol).badge, '마감됨');
+
+      // 내일 마감은 빨강
+      eq('내일 마감 신호등', R.analyze({ id: 'f', type: 'datetime', date: '2026-10-08', time: '10:00' }, now('2026-10-07'), hol).tone, 'red');
+      // 영업일이 4일 넘으면 초록
+      eq('영업일 여유 신호등', R.analyze({ id: 'g', type: 'datetime', date: '2026-10-20', time: '18:00' }, now('2026-10-07'), hol).tone, 'green');
+
+      // 채용 시 마감, 상시, 제출 완료
+      eq('채용 시 마감', R.analyze({ id: 'h', type: 'closing' }, now('2026-10-07'), hol).badge, '채용 시 마감');
+      eq('상시', R.analyze({ id: 'i', type: 'always' }, now('2026-10-07'), hol).badge, '상시');
+      eq('제출 완료는 마감이 지나도 그대로', R.analyze({ id: 'j', type: 'datetime', date: '2026-10-01', time: '10:00', status: '제출 완료' }, now('2026-10-07'), hol).tone, 'done');
+
+      // 제출 목표일 제안: 10/12(월) 바로 앞 영업일은 10/8(목) (10/11 일, 10/10 토, 10/9 한글날)
+      eq('제출 목표일 제안', R.suggestSubmitDate('2026-10-12', hol), '2026-10-08');
+
+      // D-n 변환
+      eq('D-3 변환', R.dminusToDeadline('2026-10-07', 3), { date: '2026-10-10', time: '23:59' });
+
+      // 설 연휴(2026-02-16~18 전후)가 빠지는지: 2/13(금) → 2/19(목)
+      const lunar = [...hol.entries()].filter(([d]) => d >= '2026-02-14' && d <= '2026-02-19').map(([d]) => d);
+      const exp = 6 - 2 /* 토·일(2/14,2/15) */ - lunar.filter((d) => !R.isWeekend(d)).length;
+      eq('설 연휴 반영', R.businessDaysLeft('2026-02-13', '2026-02-19', hol).count, exp);
+
+      // 정렬: 마감일 임박순 → 채용 시 마감 → 상시 → 마감됨 → 제출 완료
+      const list = [
+        { id: '1', type: 'always', status: '지원 전' },
+        { id: '2', type: 'datetime', date: '2026-10-12', time: '18:00', status: '지원 전' },
+        { id: '3', type: 'datetime', date: '2026-10-08', time: '10:00', status: '지원 전' },
+        { id: '4', type: 'closing', status: '지원 전' },
+        { id: '5', type: 'datetime', date: '2026-10-01', time: '10:00', status: '지원 전' },
+        { id: '6', type: 'datetime', date: '2026-10-09', time: '10:00', status: '제출 완료' }
+      ];
+      eq('정렬 순서', R.sortEntries(list, now('2026-10-07'), hol).map((s) => s.entry.id), ['3', '2', '4', '1', '5', '6']);
+
+      // 날짜 검사와 고정된 "오늘"
+      eq('잘못된 날짜 거부', R.isValidYmd('2026-02-30'), false);
+      eq('올바른 날짜 허용', R.isValidYmd('2026-02-28'), true);
+      eq('오늘 고정', R.kstNow({ today: '2026-10-07', time: '09:30' }), { ymd: '2026-10-07', hm: '09:30', fixed: true });
+      eq('요일 계산(2026-10-12=월)', R.WEEKDAY_KO[R.weekday('2026-10-12')], '월');
+
+      const s = document.getElementById('summary');
+      s.textContent = fail === 0 ? '전체 통과 (' + pass + '건)' : '실패 ' + fail + '건 / 통과 ' + pass + '건';
+      s.className = fail === 0 ? 'ok' : 'bad';
+      document.title = (fail === 0 ? 'PASS ' : 'FAIL ') + pass + '/' + (pass + fail);
+    })();
+  </script>
+</body>
+</html>

@@ -76,7 +76,7 @@ export function App() {
       <div className="container">
         {mode === 'artifact' && (
           <div className="banner info">
-            <b>공개용 화면입니다.</b> 샘플 입력의 AI 결과는 <b>미리 실행해 둔 실제 Claude 응답</b>이고, 숫자 계산·관리도·검증은 지금 이 화면에서 다시 실행됩니다. 직접 입력한 내용은 Claude 사용을 허용하면 그 자리에서 분석합니다.
+            <b>공개용 화면입니다.</b> 샘플 입력의 AI 결과는 <b>미리 실행해 둔 실제 Claude 응답</b>이고, 숫자 계산·관리도·검증은 지금 이 화면에서 다시 실행됩니다. {typeof (window as { claude?: unknown }).claude !== 'undefined' ? '직접 입력한 내용은 Claude 사용을 허용하면 그 자리에서 분석합니다.' : '직접 입력한 내용의 AI 분석은 로컬에서 실행해야 동작합니다(저장소 README 참고).'}
           </div>
         )}
         {mode === 'demo' && <div className="banner demo">데모 모드: 미리 준비된 가짜 응답을 보여줍니다. 실제 Claude 분석이 아닙니다.</div>}
