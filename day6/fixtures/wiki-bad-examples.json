@@ -1,0 +1,90 @@
+{
+ "치와와": {
+  "type": "disambiguation",
+  "title": "치와와",
+  "displaytitle": "<span lang=\"ko\" dir=\"ltr\"><span class=\"mw-page-title-main\">치와와</span></span>",
+  "namespace": {
+   "id": 0,
+   "text": ""
+  },
+  "wikibase_item": "Q860671",
+  "titles": {
+   "canonical": "치와와",
+   "normalized": "치와와",
+   "display": "<span lang=\"ko\" dir=\"ltr\"><span class=\"mw-page-title-main\">치와와</span></span>"
+  },
+  "pageid": 106550,
+  "lang": "ko",
+  "dir": "ltr",
+  "revision": "33895155",
+  "tid": "a77e6dbc-892c-11ed-abb7-53c41bf802c9",
+  "timestamp": "2022-12-31T17:00:40Z",
+  "description": "위키백과 동음이의어 문서",
+  "description_source": "central",
+  "content_urls": {
+   "desktop": {
+    "page": "https://ko.wikipedia.org/wiki/%EC%B9%98%EC%99%80%EC%99%80",
+    "revisions": "https://ko.wikipedia.org/wiki/%EC%B9%98%EC%99%80%EC%99%80?action=history",
+    "edit": "https://ko.wikipedia.org/wiki/%EC%B9%98%EC%99%80%EC%99%80?action=edit",
+    "talk": "https://ko.wikipedia.org/wiki/%ED%86%A0%EB%A1%A0:%EC%B9%98%EC%99%80%EC%99%80"
+   },
+   "mobile": {
+    "page": "https://ko.wikipedia.org/wiki/%EC%B9%98%EC%99%80%EC%99%80",
+    "revisions": "https://ko.wikipedia.org/wiki/Special:History/%EC%B9%98%EC%99%80%EC%99%80",
+    "edit": "https://ko.wikipedia.org/wiki/%EC%B9%98%EC%99%80%EC%99%80?action=edit",
+    "talk": "https://ko.wikipedia.org/wiki/%ED%86%A0%EB%A1%A0:%EC%B9%98%EC%99%80%EC%99%80"
+   }
+  },
+  "extract": "치와와(Chihuahua)의 다른 뜻은 다음과 같다.치와와주(Estado de Chihuahua)- 멕시코의 행정 구역\n치와와(Chihuahua) - 치와와 주의 주도\n치와와 - 개 품종. 치와와 주의 이름에서 유래",
+  "extract_html": "<p><b>치와와</b>(Chihuahua)의 다른 뜻은 다음과 같다.</p><ul><li>치와와주(Estado de Chihuahua)- 멕시코의 행정 구역\n<ul><li>치와와(Chihuahua) - 치와와 주의 주도</li></ul></li>\n<li>치와와 - 개 품종. 치와와 주의 이름에서 유래</li></ul>"
+ },
+ "샤페이": {
+  "type": "standard",
+  "title": "후세인 엘 샤페이",
+  "displaytitle": "<span lang=\"ko\" dir=\"ltr\"><span class=\"mw-page-title-main\">후세인 엘 샤페이</span></span>",
+  "namespace": {
+   "id": 0,
+   "text": ""
+  },
+  "wikibase_item": "Q62219",
+  "titles": {
+   "canonical": "후세인_엘_샤페이",
+   "normalized": "후세인 엘 샤페이",
+   "display": "<span lang=\"ko\" dir=\"ltr\"><span class=\"mw-page-title-main\">후세인 엘 샤페이</span></span>"
+  },
+  "pageid": 328162,
+  "thumbnail": {
+   "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Hussein_Al_Shafei.JPG/330px-Hussein_Al_Shafei.JPG?utm_source=ko.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+   "width": 330,
+   "height": 454
+  },
+  "originalimage": {
+   "source": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Hussein_Al_Shafei.JPG?utm_source=ko.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+   "width": 463,
+   "height": 637
+  },
+  "lang": "ko",
+  "dir": "ltr",
+  "revision": "41519962",
+  "tid": "707a1bde-2381-11f1-9ac5-4f2f26fd42c1",
+  "timestamp": "2026-03-19T10:50:27Z",
+  "description": "이집트의 혁명가",
+  "description_source": "central",
+  "content_urls": {
+   "desktop": {
+    "page": "https://ko.wikipedia.org/wiki/%ED%9B%84%EC%84%B8%EC%9D%B8_%EC%97%98_%EC%83%A4%ED%8E%98%EC%9D%B4",
+    "revisions": "https://ko.wikipedia.org/wiki/%ED%9B%84%EC%84%B8%EC%9D%B8_%EC%97%98_%EC%83%A4%ED%8E%98%EC%9D%B4?action=history",
+    "edit": "https://ko.wikipedia.org/wiki/%ED%9B%84%EC%84%B8%EC%9D%B8_%EC%97%98_%EC%83%A4%ED%8E%98%EC%9D%B4?action=edit",
+    "talk": "https://ko.wikipedia.org/wiki/%ED%86%A0%EB%A1%A0:%ED%9B%84%EC%84%B8%EC%9D%B8_%EC%97%98_%EC%83%A4%ED%8E%98%EC%9D%B4"
+   },
+   "mobile": {
+    "page": "https://ko.wikipedia.org/wiki/%ED%9B%84%EC%84%B8%EC%9D%B8_%EC%97%98_%EC%83%A4%ED%8E%98%EC%9D%B4",
+    "revisions": "https://ko.wikipedia.org/wiki/Special:History/%ED%9B%84%EC%84%B8%EC%9D%B8_%EC%97%98_%EC%83%A4%ED%8E%98%EC%9D%B4",
+    "edit": "https://ko.wikipedia.org/wiki/%ED%9B%84%EC%84%B8%EC%9D%B8_%EC%97%98_%EC%83%A4%ED%8E%98%EC%9D%B4?action=edit",
+    "talk": "https://ko.wikipedia.org/wiki/%ED%86%A0%EB%A1%A0:%ED%9B%84%EC%84%B8%EC%9D%B8_%EC%97%98_%EC%83%A4%ED%8E%98%EC%9D%B4"
+   }
+  },
+  "extract": "후세인 마무드 하산 엘 샤페이(아랍어: حسين محمود حسن الشافعي, 1918년 2월 2일 ~ 2005년 11월 18일)는 1952년 이집트 혁명에 가담한 군인이었으며, 이집트의 부통령이었다.",
+  "extract_html": "<p><b>후세인 마무드 하산 엘 샤페이</b>(<span>아랍어: </span>حسين محمود حسن الشافعي, 1918년 2월 2일 ~ 2005년 11월 18일)는 1952년 이집트 혁명에 가담한 군인이었으며, 이집트의 부통령이었다.</p>"
+ }
+}

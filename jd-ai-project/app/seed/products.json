@@ -1,0 +1,52 @@
+[
+  {
+    "id": "P-RAMEN",
+    "name": "한결 매운라면 (봉지면)",
+    "category": "면류",
+    "ingredients": ["밀가루", "팜유", "전분", "정제염", "스프(고춧가루, 간장분말, 효모추출물, 양파분말)", "산도조절제", "보존료(스프용)"],
+    "allergens": ["밀", "대두", "쇠고기"],
+    "process": ["배합", "압연·절단", "증숙", "유탕", "냉각", "스프 투입", "포장", "금속검출", "출하"],
+    "specs": { "moisture_pct_max": 5.0, "acid_value_max": 1.5, "sodium_mg_per_serving_max": 1800, "shelf_life_days": 180 },
+    "lines": ["A라인"]
+  },
+  {
+    "id": "P-SAUCE",
+    "name": "한결 데리야끼 소스 (병)",
+    "category": "소스류",
+    "ingredients": ["간장", "설탕", "물엿", "정제염", "마늘", "생강", "변성전분", "보존료(소르빈산칼륨)"],
+    "allergens": ["대두", "밀"],
+    "process": ["배합", "가열 살균", "충진", "캡핑", "냉각", "라벨링", "금속검출", "출하"],
+    "specs": { "brix_range": [38, 42], "ph_max": 4.6, "fill_volume_ml": 500, "shelf_life_days": 365 },
+    "lines": ["B라인"]
+  },
+  {
+    "id": "P-OIL",
+    "name": "한결 콩기름 (1.8L)",
+    "category": "식용유지류",
+    "ingredients": ["대두유"],
+    "allergens": ["대두"],
+    "process": ["정제", "탈취", "충진", "캡핑", "라벨링", "출하"],
+    "specs": { "acid_value_max": 0.6, "peroxide_value_max": 10, "fill_volume_ml": 1800, "shelf_life_days": 540 },
+    "lines": []
+  },
+  {
+    "id": "P-CURRY",
+    "name": "한결 순한 카레 (레토르트 파우치)",
+    "category": "즉석조리식품",
+    "ingredients": ["감자", "양파", "당근", "카레분말", "밀가루", "우유", "닭고기", "정제염", "팜유"],
+    "allergens": ["밀", "우유", "닭고기"],
+    "process": ["원료 세척·절단", "조리", "충진", "실링", "레토르트 살균", "냉각", "검사", "포장", "출하"],
+    "specs": { "sterilization_f0_min": 4, "fill_weight_g": 180, "seal_strength_n_min": 20, "shelf_life_days": 540 },
+    "lines": ["C라인"]
+  },
+  {
+    "id": "P-DUMPLING",
+    "name": "한결 고기만두 (냉동)",
+    "category": "만두류",
+    "ingredients": ["밀가루", "돼지고기", "양배추", "두부", "양파", "정제염", "참기름", "간장"],
+    "allergens": ["밀", "대두", "돼지고기", "참깨"],
+    "process": ["소 배합", "성형", "증숙", "급속냉동", "포장", "금속검출", "출하"],
+    "specs": { "core_temp_c_max": -18, "fill_weight_g": 600, "shelf_life_days": 365 },
+    "lines": []
+  }
+]

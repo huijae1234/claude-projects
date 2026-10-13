@@ -1,0 +1,173 @@
+{
+    "error": false,
+    "amount": 10,
+    "jokes": [
+        {
+            "category": "Programming",
+            "type": "twopart",
+            "setup": "Why did the functional programmer get thrown out of school?",
+            "delivery": "Because he refused to take classes.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 47,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "twopart",
+            "setup": "The gas Argon walks into a bar.\nThe barkeeper says \"What would you like to drink?\"",
+            "delivery": "But Argon doesn't react.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 147,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "single",
+            "joke": "I was struggling to figure out how lightning works, but then it struck me.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 219,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "twopart",
+            "setup": "A grocery store cashier asked if I would like my milk in a bag.",
+            "delivery": "I told her \"No, thanks. The carton works fine\".",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 170,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "twopart",
+            "setup": "What do you call a pile of kittens?",
+            "delivery": "A meowntain.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 129,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "single",
+            "joke": "To whoever stole my copy of Microsoft Office, I will find you. You have my Word!",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 190,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "twopart",
+            "setup": "What do you call a deer with no eyes?",
+            "delivery": "No eye deer.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 209,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "twopart",
+            "setup": "You see, mountains aren't just funny.",
+            "delivery": "They are hill areas.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "safe": true,
+            "id": 269,
+            "lang": "en"
+        },
+        {
+            "category": "Misc",
+            "type": "twopart",
+            "setup": "I WRITE MY JOKES IN CAPITALS.",
+            "delivery": "THIS ONE WAS WRITTEN IN PARIS.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 77,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Misc",
+            "type": "single",
+            "joke": "A neutron walks into a bar and asks for a price on a drink.\nThe barkeeper says: \"For you... no charge!\"",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 72,
+            "safe": true,
+            "lang": "en"
+        }
+    ]
+}

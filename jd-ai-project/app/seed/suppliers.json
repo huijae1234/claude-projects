@@ -1,0 +1,67 @@
+[
+  {
+    "id": "SUP-01",
+    "name": "새봄케이싱(주)",
+    "category": "부자재",
+    "supplies": ["소시지 케이싱(콜라겐)"],
+    "contact_role": "품질팀장",
+    "grade": "B",
+    "last_audit": "2026-03-12",
+    "note": "가상의 업체입니다.",
+    "history": [
+      { "id": "SI-2025-07", "date": "2025-11-04", "summary": "케이싱 롤 두께 편차로 충전 중 파열 증가. 시정조치 회신을 받음", "status": "closed" },
+      { "id": "SI-2026-02", "date": "2026-02-19", "summary": "납기 2일 지연", "status": "closed" }
+    ]
+  },
+  {
+    "id": "SUP-02",
+    "name": "대성포장산업",
+    "category": "포장재",
+    "supplies": ["컵 실링 필름", "파우치 필름"],
+    "contact_role": "기술영업 담당",
+    "grade": "A",
+    "last_audit": "2026-01-20",
+    "note": "가상의 업체입니다.",
+    "history": [
+      { "id": "SI-2026-01", "date": "2026-01-08", "summary": "필름 롤 권취 불량 1건, 교환 처리", "status": "closed" }
+    ]
+  },
+  {
+    "id": "SUP-03",
+    "name": "청우원유조합",
+    "category": "원료",
+    "supplies": ["원유"],
+    "contact_role": "품질관리 담당",
+    "grade": "A",
+    "last_audit": "2026-02-05",
+    "note": "가상의 업체입니다.",
+    "history": []
+  },
+  {
+    "id": "SUP-04",
+    "name": "한울향신료",
+    "category": "원료",
+    "supplies": ["향신료 분말", "양념 혼합분말"],
+    "contact_role": "품질관리 담당",
+    "grade": "B",
+    "last_audit": "2025-12-10",
+    "note": "가상의 업체입니다.",
+    "history": [
+      { "id": "SI-2025-09", "date": "2025-09-23", "summary": "분말 로트에서 이물(검은 입자) 클레임 1건. 원인은 포장 공정 오염으로 확인", "status": "closed" },
+      { "id": "SI-2026-03", "date": "2026-04-02", "summary": "COA에 수분 값이 빠져 서류 보완 요청", "status": "closed" }
+    ]
+  },
+  {
+    "id": "SUP-05",
+    "name": "미래라벨",
+    "category": "포장재",
+    "supplies": ["라벨 스티커", "수축 라벨"],
+    "contact_role": "영업·품질 담당",
+    "grade": "B",
+    "last_audit": "2025-11-18",
+    "note": "가상의 업체입니다.",
+    "history": [
+      { "id": "SI-2026-04", "date": "2026-05-14", "summary": "라벨 접착력 시험 성적서를 요청했으나 회신이 10일 지연", "status": "closed" }
+    ]
+  }
+]

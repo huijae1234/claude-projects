@@ -1,0 +1,287 @@
+/* 오늘 우짜쓰까? — 하늘 배경 + 유리(glass) 카드 */
+:root {
+  --radius: 22px;
+  --text: #ffffff;
+  --muted: rgba(255, 255, 255, 0.78);
+  --accent: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.16);
+  --glass: linear-gradient(160deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.12));
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --btn: rgba(255, 255, 255, 0.28);
+}
+
+/* 위험도별 강조색 (유리 위에서 잘 보이는 밝은 색) */
+body[data-tone="safe"]   { --accent: #a6ffcb; --accent-soft: rgba(120, 255, 180, 0.2); }
+body[data-tone="ok"]     { --accent: #ffffff; --accent-soft: rgba(255, 255, 255, 0.18); }
+body[data-tone="warn"]   { --accent: #ffd59a; --accent-soft: rgba(255, 170, 80, 0.28); }
+body[data-tone="danger"] { --accent: #ffb9b9; --accent-soft: rgba(255, 90, 90, 0.3); }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #2f7fd8;
+  color: var(--text);
+  font-family: "Pretendard", "Malgun Gothic", system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  text-shadow: 0 1px 3px rgba(5, 30, 80, 0.28);
+}
+
+.wrap { max-width: 560px; margin: 0 auto; padding: 24px 16px 40px; position: relative; }
+
+header { text-align: center; margin-bottom: 20px; }
+h1 { margin: 0; font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; }
+.sub { margin: 4px 0 0; color: var(--muted); font-size: 0.95rem; }
+
+/* 우산 고민하는 빗방울 캐릭터 */
+.mascot { width: 200px; max-width: 70%; height: auto; overflow: visible; filter: drop-shadow(0 6px 10px rgba(5, 30, 80, 0.25)); }
+.mascot text { text-shadow: none; }
+.mascot .body { animation: bob 2.4s ease-in-out infinite; transform-origin: 100px 192px; }
+.mascot .umb { opacity: 0; transition: opacity 0.25s; }
+.mascot.open .open-umb,
+.mascot.closed .closed-umb { opacity: 1; }
+.mascot.thinking .open-umb { animation: umb-open 4s steps(1, end) infinite; }
+.mascot.thinking .closed-umb { animation: umb-closed 4s steps(1, end) infinite; }
+@keyframes umb-open { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+@keyframes umb-closed { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(-5px) rotate(1.5deg); }
+}
+.mascot .eyes { animation: blink 4s infinite; transform-origin: 100px 140px; }
+@keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
+@media (prefers-reduced-motion: reduce) {
+  .mascot *, .mascot { animation: none !important; }
+  .mascot.thinking .closed-umb { opacity: 1; }
+}
+
+/* 밝은 구름 위에서도 글자가 읽히도록 흐림·눈은 유리를 어둡게 */
+body[data-scene="cloudy"], body[data-scene="snowy"] {
+  --glass: linear-gradient(160deg, rgba(20, 40, 75, 0.42), rgba(20, 40, 75, 0.26));
+  --glass-border: rgba(255, 255, 255, 0.4);
+}
+
+/* ===== 유리 카드 공통 ===== */
+.hero, .check, .stats > div, .outfit, .notes, .reco, .moon,
+.search input, #geo-btn, .candidates button, footer {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  backdrop-filter: blur(18px) saturate(1.35);
+  box-shadow: 0 8px 30px rgba(10, 40, 100, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.search { display: flex; gap: 8px; }
+.search input {
+  flex: 1; min-width: 0;
+  padding: 12px 16px; font-size: 1rem; border-radius: 999px;
+  color: var(--text); text-shadow: none;
+}
+.search input::placeholder { color: rgba(255, 255, 255, 0.75); }
+.search input:focus { outline: none; border-color: #fff; }
+button {
+  font: inherit; cursor: pointer; color: #fff; text-shadow: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.55); border-radius: 999px;
+  padding: 0 18px; background: var(--btn);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+button:hover { background: rgba(255, 255, 255, 0.4); }
+.search button { min-height: 46px; font-weight: 700; }
+#geo-btn { padding: 0 14px; }
+
+.candidates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.candidates button { padding: 6px 12px; font-size: 0.85rem; min-height: 0; box-shadow: none; }
+
+.status { min-height: 1.5em; margin: 14px 0; text-align: center; color: var(--muted); }
+.status.error { color: #ffd0d0; font-weight: 700; }
+
+.hero { border-radius: var(--radius); padding: 26px 20px; text-align: center; }
+.place { font-weight: 700; }
+.place span { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+.hero-icon { font-size: 4rem; line-height: 1.2; filter: drop-shadow(0 4px 8px rgba(5, 30, 80, 0.25)); }
+.hero h2 { margin: 6px 0; font-size: 1.45rem; color: var(--accent); }
+.weather-line { margin: 0; font-weight: 600; }
+.reasons { margin: 12px 0 0; padding: 10px; background: var(--accent-soft); border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 14px; font-size: 0.9rem; }
+.reasons-sub { margin: 6px 0 0; font-size: 0.75rem; color: var(--muted); }
+
+.checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.check { border-radius: var(--radius); padding: 14px 8px; text-align: center; }
+.check-label { font-size: 0.75rem; color: var(--muted); font-weight: 700; }
+.check-icon { font-size: 2rem; margin: 4px 0; }
+.check-title { font-weight: 700; font-size: 0.95rem; }
+.check-desc { margin-top: 4px; font-size: 0.75rem; color: var(--muted); }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.stats > div { border-radius: var(--radius); padding: 12px 8px; text-align: center; }
+.stats span { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 700; }
+.stats b { display: block; font-size: 1.3rem; margin: 2px 0; }
+.stats small { display: block; font-size: 0.7rem; color: var(--muted); }
+
+.outfit { margin-top: 14px; padding: 18px; border-radius: var(--radius); }
+.outfit-head { display: flex; align-items: center; gap: 12px; }
+.outfit-icon { font-size: 2.4rem; }
+.outfit h3 { margin: 0; font-size: 1.05rem; }
+.outfit-head p { margin: 2px 0 0; font-size: 0.9rem; }
+.muted { color: var(--muted); font-size: 0.8rem; }
+.outfit dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 14px 0 0; font-size: 0.92rem; }
+.outfit dt { font-weight: 700; color: var(--accent); }
+.outfit dd { margin: 0; }
+.tips { list-style: none; margin: 14px 0 0; padding: 10px 12px; background: var(--accent-soft); border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 14px; font-size: 0.85rem; }
+.tips li + li { margin-top: 6px; }
+
+.notes { list-style: none; margin: 14px 0 0; padding: 12px 16px; border-radius: var(--radius); font-size: 0.9rem; }
+.notes li + li { margin-top: 6px; }
+
+/* 달 카드: 유리 + 밤하늘 색감 */
+.moon {
+  margin-top: 14px; padding: 18px; color: #eef3ff;
+  background: linear-gradient(160deg, rgba(10, 25, 70, 0.62), rgba(30, 55, 120, 0.42));
+  border-radius: var(--radius);
+}
+.moon-head { display: flex; align-items: center; gap: 12px; }
+.moon-icon { font-size: 3rem; line-height: 1; }
+.moon h3 { margin: 0; font-size: 1.05rem; }
+.moon-pct { margin: 2px 0 0; font-size: 0.9rem; }
+.moon-pct b { font-size: 1.3rem; color: #ffe9a8; }
+.moon-pct span { color: #b4c3e6; font-size: 0.75rem; }
+.moon-meter { height: 8px; margin: 12px 0; background: rgba(255, 255, 255, 0.18); border-radius: 99px; overflow: hidden; }
+.moon-meter i { display: block; height: 100%; background: linear-gradient(90deg, #ffe9a8, #fff6d6); border-radius: 99px; }
+.moon-headline { margin: 4px 0 8px; font-size: 1.05rem; color: #ffe9a8; }
+.moon-lines, .moon-tips { list-style: none; margin: 0; padding: 0; font-size: 0.88rem; }
+.moon-lines li + li { margin-top: 4px; }
+.moon-lines li { color: #d6e0f6; }
+.moon-tips { margin-top: 10px; padding: 10px 12px; background: rgba(255, 255, 255, 0.12); border-radius: 12px; }
+.moon-tips li + li { margin-top: 6px; }
+.cloud-bars { display: flex; align-items: flex-end; gap: 4px; height: 72px; margin-top: 14px; }
+.cloud-bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.cloud-bar span { display: block; width: 100%; background: rgba(255, 255, 255, 0.25); border-radius: 4px 4px 0 0; }
+.cloud-bar.on span { background: #9fc2ff; }
+.cloud-bar em { font-style: normal; font-size: 0.6rem; color: #b4c3e6; margin-top: 2px; }
+.bars-note { margin: 6px 0 0; font-size: 0.7rem; color: #b4c3e6; }
+.moon details { margin-top: 14px; }
+.moon summary { cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #ffe9a8; }
+.moon iframe { width: 100%; height: 340px; margin-top: 10px; border: 0; border-radius: 12px; }
+
+.reco { margin-top: 14px; padding: 18px; border-radius: var(--radius); }
+.reco-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.reco-head h3 { margin: 0; font-size: 1.05rem; }
+#again-btn { padding: 6px 14px; font-size: 0.8rem; }
+.reco h4 { margin: 16px 0 8px; font-size: 0.95rem; }
+
+.songs, .foods { list-style: none; margin: 0; padding: 0; }
+.songs li + li { margin-top: 6px; }
+.songs a {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  padding: 10px 14px; border-radius: 14px;
+  background: var(--accent-soft); border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--text); text-decoration: none;
+}
+.songs a:hover { background: rgba(255, 255, 255, 0.28); }
+.songs span { color: var(--muted); font-size: 0.85rem; }
+.songs em { margin-left: auto; font-style: normal; font-size: 0.75rem; color: #fff; font-weight: 700; }
+
+.foods { display: flex; flex-wrap: wrap; gap: 8px; }
+.foods li { padding: 8px 14px; border-radius: 999px; background: var(--accent-soft); border: 1px solid rgba(255, 255, 255, 0.25); font-weight: 600; }
+.foods li span { margin-right: 6px; }
+.home-note { margin: 0 0 8px; font-size: 0.9rem; color: var(--accent); font-weight: 700; }
+
+footer {
+  margin: 28px auto 0; width: fit-content; padding: 6px 14px; border-radius: 999px;
+  text-align: center; font-size: 0.8rem; color: var(--muted);
+}
+footer a { color: inherit; }
+
+/* ===== 날씨 배경: 일러스트 없이 하늘 · 구름 · 햇살 · 비/눈 효과만 ===== */
+.scene { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.scene > * { position: absolute; inset: 0; }
+
+.sky { background: linear-gradient(120deg, #1a5cc0 0%, #2f7fd8 38%, #5aa9f0 70%, #8ccbfa 100%); }
+body[data-scene="cloudy"] .sky { background: linear-gradient(160deg, #2f4056 0%, #4a6079 55%, #6b8199 100%); }
+body[data-scene="rainy"] .sky { background: linear-gradient(165deg, #1f2833 0%, #364252 50%, #5f6f82 100%); }
+body[data-scene="snowy"] .sky { background: linear-gradient(165deg, #3e5874 0%, #6a86a3 50%, #9bb2c9 100%); }
+
+/* 번지는 부드러운 구름 (초점 나간 느낌) */
+.softclouds {
+  background:
+    radial-gradient(ellipse 38% 16% at 16% 14%, rgba(255, 255, 255, 0.38), transparent 70%),
+    radial-gradient(ellipse 30% 12% at 6% 34%, rgba(255, 255, 255, 0.30), transparent 70%),
+    radial-gradient(ellipse 26% 11% at 30% 52%, rgba(255, 255, 255, 0.22), transparent 70%),
+    radial-gradient(ellipse 22% 9% at 94% 54%, rgba(255, 255, 255, 0.28), transparent 70%),
+    radial-gradient(ellipse 34% 10% at 58% 92%, rgba(255, 255, 255, 0.24), transparent 70%);
+  filter: blur(10px);
+}
+body[data-scene="rainy"] .softclouds { opacity: 0.25; }
+body[data-scene="cloudy"] .softclouds, body[data-scene="snowy"] .softclouds { opacity: 0.6; }
+
+/* 구름: SVG 필터(feTurbulence + 조명)로 만든 입체 구름 */
+.cloudlayer { will-change: transform; }
+.cl-a { filter: url(#c-sun-a) blur(2.5px); opacity: 0.55; }
+.cl-b { filter: url(#c-sun-b) blur(3px); opacity: 0.4; }
+body[data-scene="cloudy"] .cl-a { filter: url(#c-gray-a) blur(1.5px); opacity: 0.95; }
+body[data-scene="cloudy"] .cl-b { filter: url(#c-gray-b) blur(1.5px); opacity: 0.85; }
+body[data-scene="rainy"] .cl-a { filter: url(#c-dark-a) blur(1.5px); opacity: 1; }
+body[data-scene="rainy"] .cl-b { filter: url(#c-dark-b) blur(1.5px); opacity: 0.95; }
+body[data-scene="snowy"] .cl-a { filter: url(#c-gray-a) blur(2px); opacity: 0.8; }
+body[data-scene="snowy"] .cl-b { filter: url(#c-gray-b) blur(2px); opacity: 0.55; }
+
+/* 햇살 (맑은 날만): 방사형 빛줄기 + 태양 + 렌즈 플레어 */
+.sunlight { display: none; }
+body[data-scene="sunny"] .sunlight { display: block; }
+.sunlight > * { position: absolute; inset: 0; }
+.sunlight .glow {
+  background: radial-gradient(circle at 78% 16%, #fff 0, #fffbe6 0.8%, rgba(255, 236, 160, 0.95) 2.2%, rgba(255, 214, 110, 0.6) 5%, rgba(255, 205, 100, 0.28) 12%, transparent 30%);
+  transform-origin: 78% 16%;
+  animation: glow-pulse 5s ease-in-out infinite alternate;
+}
+.sunlight .rays {
+  inset: auto; width: 300vmax; height: 300vmax;
+  left: calc(78% - 150vmax); top: calc(16% - 150vmax);
+  -webkit-mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.75) 18%, transparent 55%);
+  mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.75) 18%, transparent 55%);
+}
+.sunlight .r1 { background: conic-gradient(transparent 4.65deg, rgba(255,255,255,0.55) 5.00deg, rgba(255,255,255,0.55) 7.00deg, transparent 7.35deg, transparent 18.45deg, rgba(255,255,255,0.3) 18.80deg, rgba(255,255,255,0.3) 25.20deg, transparent 25.55deg, transparent 39.85deg, rgba(255,255,255,0.65) 40.20deg, rgba(255,255,255,0.65) 41.80deg, transparent 42.15deg, transparent 60.05deg, rgba(255,255,255,0.28) 60.40deg, rgba(255,255,255,0.28) 65.60deg, transparent 65.95deg, transparent 82.45deg, rgba(255,255,255,0.5) 82.80deg, rgba(255,255,255,0.5) 85.20deg, transparent 85.55deg, transparent 96.65deg, rgba(255,255,255,0.22) 97.00deg, rgba(255,255,255,0.22) 105.00deg, transparent 105.35deg, transparent 122.75deg, rgba(255,255,255,0.6) 123.10deg, rgba(255,255,255,0.6) 124.90deg, transparent 125.25deg, transparent 143.25deg, rgba(255,255,255,0.32) 143.60deg, rgba(255,255,255,0.32) 148.40deg, transparent 148.75deg, transparent 163.25deg, rgba(255,255,255,0.5) 163.60deg, rgba(255,255,255,0.5) 166.40deg, transparent 166.75deg, transparent 181.85deg, rgba(255,255,255,0.24) 182.20deg, rgba(255,255,255,0.24) 189.80deg, transparent 190.15deg, transparent 205.85deg, rgba(255,255,255,0.62) 206.20deg, rgba(255,255,255,0.62) 207.80deg, transparent 208.15deg, transparent 222.85deg, rgba(255,255,255,0.3) 223.20deg, rgba(255,255,255,0.3) 228.80deg, transparent 229.15deg, transparent 247.55deg, rgba(255,255,255,0.55) 247.90deg, rgba(255,255,255,0.55) 250.10deg, transparent 250.45deg, transparent 263.45deg, rgba(255,255,255,0.22) 263.80deg, rgba(255,255,255,0.22) 272.20deg, transparent 272.55deg, transparent 289.75deg, rgba(255,255,255,0.6) 290.10deg, rgba(255,255,255,0.6) 291.90deg, transparent 292.25deg, transparent 309.05deg, rgba(255,255,255,0.3) 309.40deg, rgba(255,255,255,0.3) 314.60deg, transparent 314.95deg, transparent 332.35deg, rgba(255,255,255,0.5) 332.70deg, rgba(255,255,255,0.5) 335.30deg, transparent 335.65deg, transparent 348.65deg, rgba(255,255,255,0.26) 349.00deg, rgba(255,255,255,0.26) 355.00deg, transparent 355.35deg, transparent 360deg); animation: rays-turn 240s linear infinite; }
+.sunlight .r2 { background: conic-gradient(transparent 12.95deg, rgba(255,255,255,0.35) 13.30deg, rgba(255,255,255,0.35) 14.70deg, transparent 15.05deg, transparent 30.85deg, rgba(255,255,255,0.2) 31.20deg, rgba(255,255,255,0.2) 34.80deg, transparent 35.15deg, transparent 51.05deg, rgba(255,255,255,0.4) 51.40deg, rgba(255,255,255,0.4) 52.60deg, transparent 52.95deg, transparent 72.15deg, rgba(255,255,255,0.18) 72.50deg, rgba(255,255,255,0.18) 75.50deg, transparent 75.85deg, transparent 91.85deg, rgba(255,255,255,0.35) 92.20deg, rgba(255,255,255,0.35) 93.80deg, transparent 94.15deg, transparent 109.45deg, rgba(255,255,255,0.16) 109.80deg, rgba(255,255,255,0.16) 114.20deg, transparent 114.55deg, transparent 133.05deg, rgba(255,255,255,0.4) 133.40deg, rgba(255,255,255,0.4) 134.60deg, transparent 134.95deg, transparent 154.05deg, rgba(255,255,255,0.2) 154.40deg, rgba(255,255,255,0.2) 157.60deg, transparent 157.95deg, transparent 174.85deg, rgba(255,255,255,0.35) 175.20deg, rgba(255,255,255,0.35) 176.80deg, transparent 177.15deg, transparent 194.55deg, rgba(255,255,255,0.16) 194.90deg, rgba(255,255,255,0.16) 199.10deg, transparent 199.45deg, transparent 215.95deg, rgba(255,255,255,0.4) 216.30deg, rgba(255,255,255,0.4) 217.70deg, transparent 218.05deg, transparent 235.95deg, rgba(255,255,255,0.2) 236.30deg, rgba(255,255,255,0.2) 239.70deg, transparent 240.05deg, transparent 257.85deg, rgba(255,255,255,0.35) 258.20deg, rgba(255,255,255,0.35) 259.80deg, transparent 260.15deg, transparent 277.45deg, rgba(255,255,255,0.16) 277.80deg, rgba(255,255,255,0.16) 282.20deg, transparent 282.55deg, transparent 300.95deg, rgba(255,255,255,0.4) 301.30deg, rgba(255,255,255,0.4) 302.70deg, transparent 303.05deg, transparent 320.85deg, rgba(255,255,255,0.2) 321.20deg, rgba(255,255,255,0.2) 324.80deg, transparent 325.15deg, transparent 341.85deg, rgba(255,255,255,0.35) 342.20deg, rgba(255,255,255,0.35) 343.80deg, transparent 344.15deg, transparent 360deg); animation: rays-turn 340s linear infinite reverse; }
+.sunlight .flare {
+  background:
+    radial-gradient(circle at 66% 30%, rgba(255, 255, 255, 0.22) 0 34px, rgba(255, 255, 255, 0.34) 35px, transparent 36px),
+    radial-gradient(circle at 54% 44%, rgba(255, 224, 150, 0.12) 0 66px, transparent 68px);
+}
+@keyframes rays-turn { to { transform: rotate(360deg); } }
+@keyframes glow-pulse { from { opacity: 0.88; transform: scale(0.97); } to { opacity: 1; transform: scale(1.05); } }
+
+/* 비 오는 날 아래쪽 안개 + 폭우는 더 어둡게 */
+.mist { display: none; background: linear-gradient(transparent 55%, rgba(170, 185, 200, 0.3)); }
+body[data-scene="rainy"] .mist { display: block; }
+body.heavy .scene::after { content: ""; position: absolute; inset: 0; background: rgba(8, 14, 24, 0.3); }
+
+/* 비·눈 (움직이는 부분) */
+#precip { --tilt: 12deg; --dx: -60px; }
+#precip.storm { --tilt: 19deg; --dx: -110px; }
+#precip i { position: absolute; top: -70px; display: block; will-change: transform; }
+#precip .drop {
+  border-radius: 2px;
+  background: linear-gradient(rgba(255, 255, 255, 0), rgba(235, 244, 255, 0.95));
+  animation: rain-fall linear infinite;
+}
+#precip .near { width: 2px; filter: blur(0.5px); }
+#precip .far { width: 1px; }
+@keyframes rain-fall {
+  from { transform: translate3d(0, 0, 0) rotate(var(--tilt)); }
+  to { transform: translate3d(var(--dx), 118vh, 0) rotate(var(--tilt)); }
+}
+#precip .flake { border-radius: 50%; background: #fff; animation: snow-fall linear infinite; }
+@keyframes snow-fall {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(28px, 55vh, 0); }
+  100% { transform: translate3d(-14px, 115vh, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #precip { display: none; }
+  .sunlight .glow, .sunlight .rays { animation: none; }
+}
+
+@media (max-width: 380px) {
+  .checks { gap: 6px; }
+  .check-title { font-size: 0.85rem; }
+}

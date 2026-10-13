@@ -1,0 +1,9 @@
+﻿# 비밀 정보
+.env
+data/cache/
+__pycache__/
+.pytest_tmp/
+.pytest_cache/
+
+.venv/
+data/live/

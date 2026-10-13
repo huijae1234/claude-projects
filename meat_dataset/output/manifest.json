@@ -1,0 +1,146 @@
+{
+  "fact_meat_weekly": {
+    "rows": 213520,
+    "columns": [
+      "week_start",
+      "species",
+      "region_id",
+      "cut_id",
+      "channel_id",
+      "origin",
+      "consumption_kg",
+      "sales_krw",
+      "wholesale_price_krw_kg",
+      "retail_price_krw_kg",
+      "data_type"
+    ],
+    "sha256": "c37ff77c06042d7ea4371e6ef5d6f93eea6b99bdf91fef7a721f9f04f0cd373c"
+  },
+  "fact_supply_weekly": {
+    "rows": 314,
+    "columns": [
+      "week_start",
+      "species",
+      "slaughter_heads",
+      "domestic_output_kg",
+      "import_volume_kg",
+      "import_share_pct",
+      "ending_stock_kg",
+      "data_type"
+    ],
+    "sha256": "724d289d3dde046a6c80b72874befad8c8c0d7c623fb4c2942853b253af7a245"
+  },
+  "fact_import_monthly": {
+    "rows": 360,
+    "columns": [
+      "month",
+      "species",
+      "country",
+      "import_volume_kg",
+      "import_share_pct",
+      "cif_price_usd_kg",
+      "weeks_in_month",
+      "data_type"
+    ],
+    "sha256": "fe31e490b39e6648dc7cda985a74c7d61f28c3084e41a657abd0b753a93b1f12"
+  },
+  "fact_distribution_flow_monthly": {
+    "rows": 7344,
+    "columns": [
+      "month",
+      "species",
+      "region_id",
+      "flow_id",
+      "from_stage",
+      "to_stage",
+      "volume_kg",
+      "margin_krw_kg",
+      "lead_time_days",
+      "weeks_in_month",
+      "data_type"
+    ],
+    "sha256": "1b5158624346015e29488e2d60f6fec0fb7aabac6bb45f57b0d12cc90d582727"
+  },
+  "mart_monthly_summary": {
+    "rows": 4896,
+    "columns": [
+      "month",
+      "species",
+      "region_id",
+      "channel_id",
+      "consumption_kg",
+      "sales_krw",
+      "avg_retail_price_krw_kg",
+      "per_capita_kg",
+      "import_share_pct",
+      "weeks_in_month",
+      "data_type"
+    ],
+    "sha256": "3c388d08dbccb895b3d22b5193a9a2d5012d1cd749cce8c22af5a7e0f718f076"
+  },
+  "mart_weekly_national": {
+    "rows": 6280,
+    "columns": [
+      "week_start",
+      "species",
+      "cut_id",
+      "channel_id",
+      "consumption_kg",
+      "sales_krw",
+      "avg_retail_price_krw_kg",
+      "import_share_pct",
+      "data_type"
+    ],
+    "sha256": "e32ea47dae6cadc3e28d65f5192204d34da7e20b9a1f56cef44f5f8692413f1f"
+  },
+  "dim_region": {
+    "rows": 17,
+    "columns": [
+      "region_id",
+      "region_name",
+      "region_short",
+      "area",
+      "tier",
+      "population"
+    ],
+    "sha256": "26acd5077726cc5670e69e319b5b07384de04278be3754f1cfa1af55855eef18"
+  },
+  "dim_cut": {
+    "rows": 10,
+    "columns": [
+      "cut_id",
+      "species",
+      "species_ko",
+      "cut_name_ko",
+      "cut_name_en"
+    ],
+    "sha256": "70ac1efa3d05e9cee4f043675488c3ce7e4193cc00d96351dd7f8b342ab15dbe"
+  },
+  "dim_channel": {
+    "rows": 4,
+    "columns": [
+      "channel_id",
+      "channel_name_ko",
+      "channel_name_en"
+    ],
+    "sha256": "101455736a6fefe4a79e174580b94340d851e75247a8bc3168e1c33daeae7add"
+  },
+  "dim_calendar": {
+    "rows": 157,
+    "columns": [
+      "week_start",
+      "week_end",
+      "iso_year",
+      "iso_week",
+      "month",
+      "quarter",
+      "data_type",
+      "holiday_name",
+      "weeks_to_holiday",
+      "is_samgyeopsal_day_week",
+      "is_summer_vacation_season",
+      "is_family_month"
+    ],
+    "sha256": "f24045583c1e0dbdf4e0755170938583e8964082d91cf7e780f43b0e231d633b"
+  }
+}

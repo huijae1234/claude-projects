@@ -1,0 +1,175 @@
+{
+    "error": false,
+    "amount": 10,
+    "jokes": [
+        {
+            "category": "Misc",
+            "type": "twopart",
+            "setup": "What's the difference between England and a tea bag?",
+            "delivery": "The tea bag stays in the cup longer.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "safe": true,
+            "id": 307,
+            "lang": "en"
+        },
+        {
+            "category": "Programming",
+            "type": "twopart",
+            "setup": "Hey baby I wish your name was asynchronous...",
+            "delivery": "... so you'd give me a callback.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 53,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Misc",
+            "type": "twopart",
+            "setup": "Why was the river rich?",
+            "delivery": "Because it had two banks.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 181,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "twopart",
+            "setup": "Why shouldn't you visit an expensive wig shop?",
+            "delivery": "It's too high a price \"toupee.\"",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "safe": true,
+            "id": 267,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "twopart",
+            "setup": "A Roman walks into a bar and raises 2 fingers and says to the bartender...",
+            "delivery": "\"Five beers, please.\"",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "safe": true,
+            "id": 285,
+            "lang": "en"
+        },
+        {
+            "category": "Misc",
+            "type": "twopart",
+            "setup": "My wife left me because I'm too insecure and paranoid.",
+            "delivery": "Oh wait, never mind. She was just getting the mail.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 80,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Misc",
+            "type": "single",
+            "joke": "I visited my friend at his new house. He told me to make myself at home. So I threw him out. I hate having visitors.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "safe": true,
+            "id": 303,
+            "lang": "en"
+        },
+        {
+            "category": "Pun",
+            "type": "twopart",
+            "setup": "Why did the chicken cross the road, roll in the mud and cross the road again?",
+            "delivery": "He was a dirty double-crosser!",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 208,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Programming",
+            "type": "twopart",
+            "setup": "How do you generate a random string?",
+            "delivery": "Put a Windows user in front of Vim and tell them to exit.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 126,
+            "safe": true,
+            "lang": "en"
+        },
+        {
+            "category": "Programming",
+            "type": "twopart",
+            "setup": "Hey, wanna hear a joke?",
+            "delivery": "Parsing HTML with regex.",
+            "flags": {
+                "nsfw": false,
+                "religious": false,
+                "political": false,
+                "racist": false,
+                "sexist": false,
+                "explicit": false
+            },
+            "id": 10,
+            "safe": true,
+            "lang": "en"
+        }
+    ]
+}

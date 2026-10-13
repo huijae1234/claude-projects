@@ -1,0 +1,10 @@
+# 줄바꿈을 LF로 통일
+* text=auto eol=lf
+
+# 이진 파일은 그대로
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.docx binary
+*.xlsx binary
+*.pdf binary

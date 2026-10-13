@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>나한테 물어보시개!</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>🐶 나한테 물어보시개!</h1>
+      <p class="sub">혹시...? 강아지 좋아하세요?</p>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button type="button" role="tab" data-tab="dex" aria-selected="true">도감</button>
+      <button type="button" role="tab" data-tab="quiz" aria-selected="false">퀴즈</button>
+      <button type="button" role="tab" data-tab="chat" aria-selected="false">챗봇</button>
+    </nav>
+
+    <section id="dex">
+      <input id="search" type="search" placeholder="품종 검색 (예: 푸들, retriever)" aria-label="품종 검색" autocomplete="off">
+      <div id="list" class="list"></div>
+      <div id="detail"></div>
+      <div id="ai"></div>
+    </section>
+
+    <section id="quiz-panel" hidden>
+      <p id="score" class="score"></p>
+      <div id="quiz-body"></div>
+    </section>
+
+    <section id="chat-panel" hidden>
+      <div id="chat"></div>
+    </section>
+
+    <footer id="source"></footer>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
