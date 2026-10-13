@@ -1,12 +1,20 @@
 # 의존성·빌드 결과
 node_modules/
-dist-web
+dist-web/
 dist-artifact/
 
 # 실행 중 생기는 데이터·로그
 app/data/*
 !app/data/.gitkeep
 *.log
+
+# 게시 전 검사용 개인 검색어 (이름·연락처가 들어 있음)
+*.local
+
+# 비밀 정보
+.env
+.env.*
+!.env.example
 
 # 이 PC의 개발 도구 설정 (미리보기 서버 경로 등)
 .claude/

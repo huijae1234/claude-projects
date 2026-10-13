@@ -7,3 +7,6 @@ __pycache__/
 
 .venv/
 data/live/
+secrets/
+.claude/
+source_config.json

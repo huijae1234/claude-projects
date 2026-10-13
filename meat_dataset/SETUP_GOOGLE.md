@@ -6,7 +6,7 @@
 4. 키 파일 안의 `client_email` 주소를 드라이브 폴더 `육류 가상 데이터셋 (2024-2026)`에 **뷰어**로 공유합니다.
 5. `meat_dataset/source_config.json` 을 만듭니다.
    ```json
-   {"folder_id": "1FIXv_ferpvsNdR_Z-u5JIcLg0mEqK4lA", "service_account_file": "secrets/service_account.json"}
+   {"folder_id": "<드라이브 폴더 ID>", "service_account_file": "secrets/service_account.json"}
    ```
 6. 실행: `streamlit run app.py`
 

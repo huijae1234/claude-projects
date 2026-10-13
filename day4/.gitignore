@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+secrets/
+source_config.json
+.venv/
+.pytest_cache/
+.pytest_tmp/
+node_modules/
+*.log
+.claude/
