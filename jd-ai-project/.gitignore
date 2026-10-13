@@ -1,6 +1,7 @@
 # 의존성·빌드 결과
 node_modules/
-dist-web/
+dist-web
+dist-artifact/
 
 # 실행 중 생기는 데이터·로그
 app/data/*

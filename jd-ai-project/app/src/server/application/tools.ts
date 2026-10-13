@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { type AppError, type Result, ok } from '../../shared/result';
 import { type EquipmentAnalysis, type EquipmentRow, analyzeEquipment } from '../domain/equipment';
+import { type HygieneAnalysis, type HygieneRow, analyzeHygiene } from '../domain/hygiene';
 import { type InspectionAnalysis, type InspectionRow, analyzeInspection } from '../domain/inspection';
 import type { Claim, Product, ProductionRow, Regulation, Supplier } from '../domain/seed';
 import { type FlaggedRow, type ProductionStats, analyzeProduction } from '../domain/stats';
@@ -271,13 +272,19 @@ export async function ncrDraftTool(llm: LlmClient, memo: string): Promise<Result
 
 // ───────────── 품질관리: 법규 개정 영향도 ─────────────
 
+/** "제1조", "제1조(목적)", "제 1 조"를 같은 조로 본다. */
+const articleKey = (no: string) => no.replace(/\([^)]*\)/g, '').replace(/\s+/g, '');
+const sameArticle = (a: string, b: string) => articleKey(a) === articleKey(b);
+/** AI가 인용문 앞에 붙인 "제2조:", "제1조(목적)" 같은 조 표시를 뗀다. 원문 본문에는 이 표시가 없다. */
+const stripArticleLabel = (q: string) => q.replace(/^\s*\[?\s*제\s*\d+\s*조(?:\s*의\s*\d+)?(?:\s*\([^)]*\))?\s*\]?\s*[:：.]?\s*/, '');
+
 export const RegulationAiSchema = z.object({
   summary: z.string().describe('개정 내용 요약(비전문가도 이해 가능하게)'),
   impacts: z.array(
     z.object({
       product_id: z.string(),
       article_no: z.string().describe('근거 조문 번호. 예: 제1조'),
-      quoted_text: z.string().describe('근거 조문에서 그대로 인용한 문장(수정 금지)'),
+      quoted_text: z.string().describe('근거 조문 본문에서 그대로 복사한 문장(조 번호는 붙이지 말 것, 수정 금지). level이 none이면 빈 문자열'),
       level: z.enum(['high', 'medium', 'low', 'none']),
       reason: z.string(),
       actions: z.array(z.string()).describe('필요 조치(담당 부서 포함)'),
@@ -290,7 +297,8 @@ export type RegulationAi = z.infer<typeof RegulationAiSchema>;
 export interface RegulationResult {
   regulation_id: string;
   summary: string;
-  impacts: Array<RegulationAi['impacts'][number] & { citation_verified: boolean }>;
+  /** citation_verified: true=원문 일치, false=불일치, null=영향 없음이라 인용이 없음 */
+  impacts: Array<RegulationAi['impacts'][number] & { citation_verified: boolean | null }>;
   general_actions: string[];
   unknown_products_dropped: number;
 }
@@ -317,9 +325,10 @@ export async function regulationImpactTool(
   const kept = ai.value.impacts.filter((i) => known.has(i.product_id));
   // 환각 방지: 인용문이 실제 조문에 있는지는 코드가 검증한다.
   const impacts = kept.map((i) => {
-    const article = regulation.articles.find((a) => a.no === i.article_no);
-    const quote = i.quoted_text.trim();
-    return { ...i, citation_verified: !!article && quote.length > 0 && article.text.includes(quote) };
+    const quote = squash(stripArticleLabel(i.quoted_text));
+    if (i.level === 'none' && quote.length === 0) return { ...i, citation_verified: null }; // 영향 없음: 인용할 근거 없음
+    const article = regulation.articles.find((a) => sameArticle(a.no, i.article_no));
+    return { ...i, citation_verified: !!article && quote.length > 0 && squash(article.text).includes(quote) };
   });
 
   return ok({
@@ -511,3 +520,72 @@ ${memo}`,
     flagged_phrases: findRiskyPhrases(ai.value.letter_markdown),
   });
 }
+
+// ───────────── 품질보증: 위생점검 분석 ─────────────
+
+export const HygieneAiSchema = z.object({
+  headline: z.string().describe('지금 가장 먼저 조치할 공장·항목과 이유를 한 줄로'),
+  plant_assessments: z
+    .array(
+      z.object({
+        plant: z.string().describe('분석 결과의 공장 이름 그대로'),
+        summary: z.string().describe('이 공장에서 무슨 일이 일어나고 있는지'),
+        probable_causes: z.array(z.string()).describe('반복·지연의 추정 원인("추정" 표시, 입력에 근거한 것만)'),
+        actions: z.array(
+          z.object({ action: z.string(), urgency: z.enum(['immediate', 'within_week', 'next_pm']), owner: z.string() }),
+        ),
+      }),
+    )
+    .describe('위험도가 low가 아닌 공장만'),
+  systemic_actions: z.array(z.string()).describe('여러 공장 공통 문제에 대한 본사 차원 조치'),
+  next_audit_focus: z
+    .array(z.object({ plant: z.string(), item: z.string().describe('점검표(checklist)에 있는 항목 이름 그대로'), reason: z.string() }))
+    .describe('다음 점검 때 중점으로 볼 항목'),
+  report_markdown: z.string().min(150).describe('월간 위생점검 결과 보고서 초안(마크다운). 숫자는 입력 그대로'),
+});
+export type HygieneAi = z.infer<typeof HygieneAiSchema>;
+
+export interface HygieneResult {
+  analysis: HygieneAnalysis;
+  ai: Omit<HygieneAi, 'next_audit_focus'> & {
+    /** verified: 공장과 항목이 실제 점검 기록·점검표에 있는가 (AI가 없는 항목을 만들지 않았는지) */
+    next_audit_focus: Array<HygieneAi['next_audit_focus'][number] & { verified: boolean }>;
+  };
+  unknown_plants_dropped: number;
+}
+
+export async function hygieneTool(llm: LlmClient, rows: HygieneRow[]): Promise<Result<HygieneResult, AppError>> {
+  const analysis = analyzeHygiene(rows);
+  const expected = analysis.plants.filter((p) => p.risk !== 'low').length;
+  const schema = HygieneAiSchema.refine((v) => v.plant_assessments.length >= expected, {
+    message: `위험도가 low가 아닌 ${expected}개 공장 모두에 대한 plant_assessments가 필요합니다`,
+    path: ['plant_assessments'],
+  });
+  const ai = await generateStructured(llm, {
+    system: SYSTEM,
+    prompt:
+      `아래는 코드가 집계한 공장별 위생점검 결과입니다. 숫자·위험도·반복 여부는 이미 검증되었으니 바꾸거나 다시 계산하지 마세요.\n` +
+      `- recurring: 최근 점검들 중 같은 항목이 반복해서 부적합 (worsening=true면 심각도가 높아짐)\n` +
+      `- overdue: 시정 기한이 지났는데 아직 닫히지 않은 지적\n- systemic: 최근 2개월 안에 여러 공장에서 같은 항목이 부적합\n\n` +
+      `할 일: ① 위험도가 low가 아닌 공장마다 상황·추정 원인·조치(담당 부서 포함) ② 공통 문제에 대한 본사 차원 조치 ` +
+      `③ 다음 점검 중점 항목(item은 checklist에 있는 이름 그대로) ④ 월간 보고서 초안.\n` +
+      `원인은 "추정"으로 표시하고, 입력에 없는 사실은 쓰지 마세요.\n\n` +
+      `[위생점검 분석]\n${JSON.stringify(analysis)}`,
+    schema,
+  });
+  if (!ai.ok) return ai;
+
+  const plants = new Set(analysis.plants.map((p) => p.plant));
+  const items = new Set(analysis.checklist);
+  const kept = ai.value.plant_assessments.filter((x) => plants.has(x.plant));
+  return ok({
+    analysis,
+    ai: {
+      ...ai.value,
+      plant_assessments: kept,
+      next_audit_focus: ai.value.next_audit_focus.map((f) => ({ ...f, verified: plants.has(f.plant) && items.has(f.item) })),
+    },
+    unknown_plants_dropped: ai.value.plant_assessments.length - kept.length,
+  });
+}
+

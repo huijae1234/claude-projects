@@ -33,6 +33,24 @@
 `http://<PC의 와이파이 IP>:5173` (PC에서 `ipconfig`로 확인. IP는 공유기에 따라 바뀔 수 있다.)
 접속이 안 되면 윈도우 방화벽에서 Node.js 허용 여부와 공유기의 기기 간 격리(AP isolation) 설정을 확인한다.
 
+### 링크로 어디서든 열기 (Claude 아티팩트)
+
+서버 없이 도는 단일 HTML로 만들어 claude.ai 아티팩트로 게시할 수 있다. 같은 도구 코드(`src/server/core.ts`)를 브라우저에서 돌리고, 데이터는 페이지에 내장한다.
+
+| 입력 | AI 응답 | 숫자 계산·검증 |
+|---|---|---|
+| 샘플(33건) | 미리 실행해 둔 **실제 Claude 응답**(`src/static/recordings.json`) | 지금 화면에서 다시 계산 |
+| 직접 입력 | 뷰어가 Claude 사용을 허용하면 그 자리에서 분석, 아니면 안내 | 지금 화면에서 계산 |
+
+```
+npm run record:artifact   # 샘플마다 실제 Claude로 한 번씩 돌려 기록 (이미 기록된 질문은 건너뜀, --fresh로 처음부터)
+npm run build:artifact    # dist-artifact/artifact.html 생성
+python scripts/scan-artifact.py   # 게시 전 개인정보·키 검사
+npm run preview:artifact  # 로컬에서 미리 보기 (http://localhost:4173)
+```
+
+도구나 프롬프트를 바꾸면 질문이 달라져 기록이 맞지 않으니 `record:artifact`를 다시 돌려야 한다(테스트가 어긋나면 알려 준다).
+
 로그인 없이 화면만 보려면 `npm run dev:demo` (서버 대신 실행). 상단에 "데모 모드" 배너가 뜨며 **가짜 응답**이다.
 
 ## 구조

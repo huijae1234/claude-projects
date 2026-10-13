@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { InspectionResult } from '../../server/application/tools';
-import type { SeriesAnalysis, Violation } from '../../server/domain/inspection';
+import type { InspectionAnalysis, SeriesAnalysis, Violation } from '../../server/domain/inspection';
 import { api } from '../api';
 import { ChartLegend, ControlChart } from '../ControlChart';
 import { RULE_LABEL, memoFor } from '../ncrMemo';
-import { Badge, CsvPicker, Disclaimer, RunStatus, useRun } from '../ui';
+import { AiWait, Badge, CsvPicker, Disclaimer, metaOf, RunStatus, usePreviewRun } from '../ui';
 
 const RISK = { high: ['red', '위험 높음'], medium: ['orange', '주의'], low: ['green', '정상'] } as const;
 const URGENCY = { immediate: ['red', '즉시'], within_week: ['orange', '1주 내'], next_pm: ['gray', '다음 정기점검'] } as const;
@@ -14,10 +14,12 @@ export const NCR_PREFILL_EVENT = 'ncr-prefill';
 
 export function InspectionTool() {
   const [csv, setCsv] = useState('');
-  const { loading, error, data, run } = useRun<InspectionResult>();
-  const aiBy = new Map(data?.ai.assessments.map((a) => [a.series_key, a]));
+  const { preview, full, loading, error, cancelled, start, cancel } = usePreviewRun<{ analysis: InspectionAnalysis }, InspectionResult>();
+  const analysis = full?.analysis ?? preview?.analysis; // 관리도는 AI를 기다리지 않고 먼저 그린다
+  const ai = full?.ai;
+  const aiBy = new Map(ai?.assessments.map((a) => [a.series_key, a]));
   const counts = { high: 0, medium: 0, low: 0 };
-  data?.analysis.series.forEach((s) => (counts[s.risk] += 1));
+  analysis?.series.forEach((s) => (counts[s.risk] += 1));
 
   return (
     <section className="tool">
@@ -31,16 +33,24 @@ export function InspectionTool() {
         onChange={(c) => setCsv(c)}
       />
       <div className="row">
-        <button disabled={loading || !csv} onClick={() => run(() => api<InspectionResult>('/api/tools/inspection', { csv }))}>
+        <button
+          disabled={loading || !csv}
+          onClick={() =>
+            start(
+              (signal) => api<{ analysis: InspectionAnalysis }>('/api/tools/inspection/preview', { csv }, signal),
+              (signal) => api<InspectionResult>('/api/tools/inspection', { csv }, signal),
+            )
+          }
+        >
           이상 탐지하기
         </button>
       </div>
-      <RunStatus loading={loading} error={error} />
+      <RunStatus loading={loading} error={error} cancelled={cancelled} onCancel={cancel} typical="25~40초" what="AI가 해석 중입니다" />
 
-      {data && (
+      {analysis && (
         <div className="result">
           <h4>AI 요약</h4>
-          <p className="headline">{data.ai.headline}</p>
+          {ai ? <p className="headline">{ai.headline}</p> : loading && <AiWait>AI가 해석하는 중입니다. 아래 관리도와 위험도는 코드가 계산한 확정 값입니다.</AiWait>}
 
           <div className="tiles" aria-label="위험도 요약">
             <div className="tile red"><b>{counts.high}</b><span>위험 높음</span></div>
@@ -50,19 +60,19 @@ export function InspectionTool() {
 
           <h4>검사 항목별 관리도 <small>(코드 계산 · 위험도순)</small></h4>
           <ChartLegend />
-          {data.analysis.series.map((s) => (
+          {analysis.series.map((s) => (
             <SeriesCard key={s.key} s={s} ai={aiBy.get(s.key)} />
           ))}
-          {data.unknown_series_dropped > 0 && <p className="muted">존재하지 않는 항목 {data.unknown_series_dropped}건은 결과에서 제외했습니다.</p>}
+          {full && full.unknown_series_dropped > 0 && <p className="muted">존재하지 않는 항목 {full.unknown_series_dropped}건은 결과에서 제외했습니다.</p>}
 
-          {data.ai.monitoring_suggestions.length > 0 && (
+          {ai && ai.monitoring_suggestions.length > 0 && (
             <>
               <h4>모니터링 제안</h4>
               <div className="table-wrap">
                 <table>
                   <thead><tr><th>대상</th><th>제안</th></tr></thead>
                   <tbody>
-                    {data.ai.monitoring_suggestions.map((m, i) => (
+                    {ai.monitoring_suggestions.map((m, i) => (
                       <tr key={i}><td>{m.target}</td><td>{m.suggestion}</td></tr>
                     ))}
                   </tbody>
@@ -70,7 +80,7 @@ export function InspectionTool() {
               </div>
             </>
           )}
-          <Disclaimer />
+          {ai && <Disclaimer meta={metaOf(full)} />}
         </div>
       )}
     </section>

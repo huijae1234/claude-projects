@@ -1,5 +1,6 @@
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import type { LlmClient, LlmRequest } from '../../application/llm';
+import { currentRequestSignal } from '../../application/requestContext';
 import { type AppError, ErrorCode, type Result, err, ok } from '../../../shared/result';
 
 /**
@@ -14,8 +15,17 @@ export class ClaudeAgentLlmClient implements LlmClient {
   ) {}
 
   async complete(req: LlmRequest): Promise<Result<unknown, AppError>> {
+    const requestSignal = currentRequestSignal();
+    if (requestSignal?.aborted) return err(ErrorCode.LlmCallFailed, '요청이 취소되어 Claude를 호출하지 않았습니다.');
+
     const abortController = new AbortController();
-    const timer = setTimeout(() => abortController.abort(), this.timeoutMs);
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      abortController.abort();
+    }, this.timeoutMs);
+    const onRequestAbort = () => abortController.abort();
+    requestSignal?.addEventListener('abort', onRequestAbort, { once: true });
     try {
       const stream = query({
         prompt: req.prompt,
@@ -46,11 +56,15 @@ export class ClaudeAgentLlmClient implements LlmClient {
       return err(ErrorCode.LlmCallFailed, 'Claude 응답이 없습니다');
     } catch (e) {
       if (abortController.signal.aborted) {
-        return err(ErrorCode.LlmCallFailed, `Claude 응답이 ${this.timeoutMs / 1000}초 안에 오지 않아 중단했습니다. 잠시 뒤 다시 시도하세요.`);
+        return err(
+          ErrorCode.LlmCallFailed,
+          timedOut ? `Claude 응답이 ${this.timeoutMs / 1000}초 안에 오지 않아 중단했습니다. 잠시 뒤 다시 시도하세요.` : '요청이 취소되어 Claude 호출을 중단했습니다.',
+        );
       }
       return err(ErrorCode.LlmCallFailed, `Claude 호출 예외: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       clearTimeout(timer);
+      requestSignal?.removeEventListener('abort', onRequestAbort);
     }
   }
 }

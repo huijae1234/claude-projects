@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { NcrResult } from '../../server/application/tools';
 import type { NcrMemo } from '../../server/domain/seed';
 import { api } from '../api';
-import { Badge, CopyButton, Disclaimer, RunStatus, useRun } from '../ui';
+import { Badge, CopyButton, Disclaimer, metaOf, RunStatus, useRun } from '../ui';
 import { NCR_PREFILL_EVENT } from './InspectionTool';
 
 const TYPE: Record<NcrResult['nc_type'], string> = {
@@ -19,7 +19,7 @@ export function NcrTool() {
   const [id, setId] = useState('');
   const [text, setText] = useState('');
   const [listState, setListState] = useState<'loading' | 'ok' | string>('loading');
-  const { loading, error, data, run } = useRun<NcrResult>();
+  const { loading, error, cancelled, data, run, cancel } = useRun<NcrResult>();
 
   useEffect(() => {
     api<NcrMemo[]>('/api/seed/ncr_memos')
@@ -71,12 +71,12 @@ export function NcrTool() {
         <textarea rows={5} value={text} onChange={(e) => { setText(e.target.value); setId(''); }} placeholder="예) 6/26 야간조 소시지라인 금속검출기 3회 연속 반응. 로트 S0626-02 …" />
       </label>
       <div className="row">
-        <button disabled={loading || text.trim().length === 0} onClick={() => run(() => api<NcrResult>('/api/tools/ncr', { text }))}>
+        <button disabled={loading || text.trim().length === 0} onClick={() => run((signal) => api<NcrResult>('/api/tools/ncr', { text }, signal))}>
           보고서 초안 만들기
         </button>
         <span className="kv">{text.length}자</span>
       </div>
-      <RunStatus loading={loading} error={error} />
+      <RunStatus loading={loading} error={error} cancelled={cancelled} onCancel={cancel} typical="30~80초" />
 
       {data && (
         <div className="result">
@@ -163,7 +163,7 @@ export function NcrTool() {
 
           <div className="row between"><h4>보고서 본문 (표준 양식 초안)</h4><CopyButton text={data.report_markdown} /></div>
           <pre className="doc">{data.report_markdown}</pre>
-          <Disclaimer />
+          <Disclaimer meta={metaOf(data)} />
         </div>
       )}
     </section>

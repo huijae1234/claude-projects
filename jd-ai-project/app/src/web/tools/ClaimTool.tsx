@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { ClaimAi } from '../../server/application/tools';
 import type { Claim } from '../../server/domain/seed';
 import { api } from '../api';
-import { Badge, CopyButton, Disclaimer, RunStatus, useRun } from '../ui';
+import { Badge, CopyButton, Disclaimer, metaOf, RunStatus, useRun } from '../ui';
 
 const SEVERITY = { critical: ['red', '긴급'], major: ['orange', '중대'], minor: ['yellow', '경미'], inquiry: ['gray', '단순 문의·의견'] } as const;
 const CATEGORY: Record<ClaimAi['category'], string> = {
@@ -15,7 +15,7 @@ export function ClaimTool() {
   const [id, setId] = useState('');
   const [custom, setCustom] = useState('');
   const [listState, setListState] = useState<'loading' | 'ok' | string>('loading');
-  const { loading, error, data, run } = useRun<ClaimAi>();
+  const { loading, error, cancelled, data, run, cancel } = useRun<ClaimAi>();
 
   useEffect(() => {
     api<Claim[]>('/api/seed/claims')
@@ -45,12 +45,12 @@ export function ClaimTool() {
       <div className="row">
         <button
           disabled={loading || (!useCustom && !id)}
-          onClick={() => run(() => api<ClaimAi>('/api/tools/claim', useCustom ? { text: custom } : { claim_id: id }))}
+          onClick={() => run((signal) => api<ClaimAi>('/api/tools/claim', useCustom ? { text: custom } : { claim_id: id }, signal))}
         >
           분류하고 회신 초안 만들기
         </button>
       </div>
-      <RunStatus loading={loading} error={error} />
+      <RunStatus loading={loading} error={error} cancelled={cancelled} onCancel={cancel} typical="15~30초" />
 
       {data && (
         <div className="result">
@@ -68,7 +68,7 @@ export function ClaimTool() {
           </div>
           <div className="row between"><h4>고객 회신 초안</h4><CopyButton text={data.reply_draft} /></div>
           <pre className="doc">{data.reply_draft}</pre>
-          <Disclaimer />
+          <Disclaimer meta={metaOf(data)} />
         </div>
       )}
     </section>

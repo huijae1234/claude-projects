@@ -300,3 +300,89 @@ for (let i = 0; i < INS_DAYS; i++) {
 }
 writeFileSync(`${OUT}inspection_dairy_meat.csv`, iRows.join('\n') + '\n', 'utf8');
 console.log(`inspection_dairy_meat.csv: ${iRows.length - 1} rows`);
+
+// ───────── 위생점검 기록 (품질보증: 반복 지적·기한 초과 분석용) ─────────
+// 2026-01 ~ 06, 3개 공장 × 매월 1회 × 점검 항목 10개 = 180행. 기준일(as of)은 마지막 점검일(6/15).
+//  평택 '방충망·출입문 밀폐'     : 6회 중 4회 부적합 → 반복 지적
+//  음성 '냉장·냉동 온도 기록'    : 3월부터 매달 부적합, 심각도 하→중 → 반복 + 악화
+//  안양 '원료 보관 구분(알레르기)': 5월 '상' 미결·기한 초과, 6월 '상' 재발 → 기한 초과 중대 지적
+//  세 공장 모두 6월 '포충등 관리 기록' 부적합 → 여러 공장 공통 문제
+const HY_ITEMS: Array<[string, string]> = [
+  ['작업자 위생복·두건 착용', '작업장 입구'],
+  ['손 세척·소독 실시', '작업장 입구'],
+  ['방충망·출입문 밀폐', '포장실'],
+  ['포충등 관리 기록', '포장실'],
+  ['바닥·배수구 청결', '가공실'],
+  ['설비 세척 상태', '가공실'],
+  ['냉장·냉동 온도 기록', '원료창고'],
+  ['원료 보관 구분(알레르기)', '원료창고'],
+  ['유리·경질 플라스틱 관리', '포장실'],
+  ['세척제·약품 보관', '세척실'],
+];
+const HY_PLANTS: Array<[string, number]> = [['음성공장', 10], ['안양공장', 12], ['평택공장', 15]];
+const HY_DUE_DAYS: Record<string, number> = { 상: 7, 중: 14, 하: 21 };
+const hyDate = (m: number, d: number) => `2026-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+const addDays = (date: string, n: number) => new Date(Date.parse(`${date}T00:00:00Z`) + n * dayMs).toISOString().slice(0, 10);
+const AS_OF = '2026-06-15';
+
+// 심어둔 부적합: [공장, 월, 항목, 심각도, 지적 내용, 미결 여부]
+const HY_PLANTED: Array<[string, number, string, string, string, boolean]> = [
+  ['평택공장', 2, '방충망·출입문 밀폐', '중', '포장실 방충망 하단 찢어짐(약 10cm)', false],
+  ['평택공장', 3, '방충망·출입문 밀폐', '중', '포장실 출입문 하부 틈새 5mm', false],
+  ['평택공장', 5, '방충망·출입문 밀폐', '중', '포장실 방충망 재파손, 지난 수리 부위 옆', false],
+  ['평택공장', 6, '방충망·출입문 밀폐', '중', '포장실 출입문 자동 닫힘 장치 고장', true],
+  ['음성공장', 3, '냉장·냉동 온도 기록', '하', '원료창고 냉장고 2호 오후 기록 1회 누락', false],
+  ['음성공장', 4, '냉장·냉동 온도 기록', '하', '냉장고 2호 기록 2회 누락', false],
+  ['음성공장', 5, '냉장·냉동 온도 기록', '중', '냉동고 1호 주말 기록 공백, 온도 이탈 확인 불가', false],
+  ['음성공장', 6, '냉장·냉동 온도 기록', '중', '냉장고 2호 기록지 미비치, 3일치 누락', true],
+  ['안양공장', 5, '원료 보관 구분(알레르기)', '상', '참깨 원료가 일반 원료 선반에 혼재 보관', true],
+  ['안양공장', 6, '원료 보관 구분(알레르기)', '상', '땅콩 분말 표시 없이 공용 용기에 보관', true],
+  ['음성공장', 6, '포충등 관리 기록', '하', '포충등 포획지 교체 기록 누락', true],
+  ['안양공장', 6, '포충등 관리 기록', '하', '포충등 1대 전원 꺼짐, 기록 없음', true],
+  ['평택공장', 6, '포충등 관리 기록', '하', '포충등 포획 수 기록 2주 공백', true],
+];
+const HY_RANDOM_FINDINGS: Record<string, string> = {
+  '작업자 위생복·두건 착용': '두건 밖으로 머리카락 노출 1명',
+  '손 세척·소독 실시': '손 소독기 소독액 소진',
+  '바닥·배수구 청결': '배수구 트랩 이물 적치',
+  '설비 세척 상태': '컨베이어 하부 잔여물',
+  '유리·경질 플라스틱 관리': '경질 플라스틱 점검표 미기록',
+  '세척제·약품 보관': '세척제 용기 표시 훼손',
+};
+
+const hRows = ['date,plant,area,item,result,severity,finding,due_date,closed_date'];
+for (let m = 1; m <= 6; m++) {
+  for (const [plant, day] of HY_PLANTS) {
+    const date = hyDate(m, day);
+    for (const [item, area] of HY_ITEMS) {
+      const planted = HY_PLANTED.find((p) => p[0] === plant && p[1] === m && p[2] === item);
+      let nc = false;
+      let sev = '';
+      let finding = '';
+      let open = false;
+      if (planted) {
+        [, , , sev, finding, open] = planted;
+        nc = true;
+      } else if (HY_RANDOM_FINDINGS[item] && rand() < 0.05) {
+        nc = true;
+        sev = rand() < 0.75 ? '하' : '중';
+        finding = HY_RANDOM_FINDINGS[item]!;
+      }
+      if (!nc) {
+        hRows.push([date, plant, area, item, '적합', '', '', '', ''].join(','));
+        continue;
+      }
+      const due = addDays(date, HY_DUE_DAYS[sev]!);
+      // 미결이 아니면 대부분 기한 안에 닫힘, 일부는 늦게 닫힘
+      let closed = '';
+      if (!open) {
+        const late = rand() < 0.25;
+        closed = addDays(due, late ? 3 + Math.floor(rand() * 6) : -Math.floor(rand() * 5));
+        if (closed > AS_OF) closed = ''; // 기준일 이후 날짜는 아직 안 닫힌 것으로
+      }
+      hRows.push([date, plant, area, item, '부적합', sev, `"${finding}"`, due, closed].join(','));
+    }
+  }
+}
+writeFileSync(`${OUT}hygiene_audits.csv`, hRows.join('\n') + '\n', 'utf8');
+console.log(`hygiene_audits.csv: ${hRows.length - 1} rows`);

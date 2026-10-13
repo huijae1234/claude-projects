@@ -1,5 +1,5 @@
 export type RoleId = 'production' | 'qc' | 'qa';
-export type ToolId = 'production' | 'equipment' | 'inspection' | 'ncr' | 'regulation' | 'claim' | 'supplier';
+export type ToolId = 'production' | 'equipment' | 'inspection' | 'ncr' | 'regulation' | 'claim' | 'supplier' | 'hygiene';
 
 export interface FlowStep {
   name: string;
@@ -87,22 +87,24 @@ export const ROLES: Role[] = [
       { name: '클레임 접수·분류', desc: '유형과 심각도를 정하고 건강 위해 여부를 가린다', tool: 'claim' },
       { name: '원인 조사 지시', desc: '로트·공정·기록 기준으로 조사 항목을 내린다', tool: 'claim' },
       { name: '고객 회신', desc: '원인을 단정하지 않고 사과·조치·후속을 안내한다', tool: 'claim' },
-      { name: '공장 위생점검', desc: '체크리스트로 점검하고 지적사항 이행을 추적한다' },
+      { name: '공장 위생점검', desc: '반복 지적과 기한 지난 시정조치를 찾아 다음 점검 중점을 정한다', tool: 'hygiene' },
       { name: '표시사항 검토', desc: '알레르기·영양성분 표시의 법규 적합성을 본다' },
       { name: '협력업체 관리', desc: '품질 이슈를 업체에 알리고 조사·시정조치를 요청한다', tool: 'supplier' },
     ],
     problems: [
       { problem: '클레임 분류·원인 조사 항목 정리·회신문 작성에 시간이 든다', ai: '유형·심각도 분류 + 조사 항목 + 회신 초안' },
       { problem: '심각 클레임(이물·알레르기)의 초동 대응이 사람마다 다르다', ai: '즉시 조치 체크리스트와 기관 보고 검토 알림' },
+      { problem: '위생점검 지적이 공장마다 반복되는데, 이력이 엑셀에 흩어져 반복·기한 초과를 놓친다', ai: '반복 지적·기한 초과·공통 문제 자동 집계(코드) + 원인 추정·다음 점검 중점·보고서(AI)' },
       { problem: '협력업체에 이슈를 알리는 문서는 귀책을 단정하거나 근거·과거 이력이 빠지기 쉽다', ai: '사실·요청·기한을 갖춘 공문 초안 + 책임 단정 표현 검사 + 업체 기록 기반 이력 인용' },
     ],
     split: {
-      code: '메모 인용·업체 이력 대조, 책임 암시 표현 검사, 입력·출력 스키마 검증',
+      code: '위생점검 반복·기한 초과 집계, 메모 인용·업체 이력 대조, 책임 암시 표현 검사',
       ai: '분류·회신 초안, 공문 구성(현황·요청·기한), 발송 전 확인 사항 제안',
       human: '고객 응대, 회수·기관 보고 결정, 공문 최종 검토와 발송',
     },
     tools: [
       { id: 'claim', name: '클레임 분류·회신 초안', desc: '클레임 접수문 → 유형·심각도·조사 항목·회신 초안' },
+      { id: 'hygiene', name: '위생점검 분석', desc: '점검 기록 CSV → 반복 지적·기한 초과·공통 문제 집계(코드) → 원인 추정·다음 점검 중점·보고서(AI)' },
       { id: 'supplier', name: '협력업체 통보서 초안', desc: '상황 메모 + 업체 기록 → 공문 초안·요청 자료 · 인용·이력은 코드가 대조, 책임 단정 표현은 경고' },
     ],
   },

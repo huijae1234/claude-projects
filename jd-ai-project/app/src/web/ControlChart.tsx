@@ -88,13 +88,13 @@ export function ControlChart({ s }: { s: SeriesAnalysis }) {
 export function ChartLegend() {
   return (
     <p className="legend" aria-hidden="true">
-      <span><i className="lg oos" /> 규격 이탈</span>
-      <span><i className="lg beyond" /> 관리한계(±3σ) 이탈</span>
-      <span><i className="lg shift" /> 평균 이동 구간</span>
-      <span><i className="lg spec" /> 규격 한계</span>
-      <span><i className="lg limit" /> 관리한계</span>
-      <span><i className="lg area base" /> 정상 기준선 구간</span>
-      <span><i className="lg area recent" /> 최근 14개</span>
+      <span><i className="swatch oos" /> 규격 이탈</span>
+      <span><i className="swatch beyond" /> 관리한계(±3σ) 이탈</span>
+      <span><i className="swatch shift" /> 평균 이동 구간</span>
+      <span><i className="swatch spec" /> 규격 한계</span>
+      <span><i className="swatch limit" /> 관리한계</span>
+      <span><i className="swatch area base" /> 정상 기준선 구간</span>
+      <span><i className="swatch area recent" /> 최근 14개</span>
     </p>
   );
 }

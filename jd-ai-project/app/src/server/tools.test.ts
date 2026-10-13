@@ -124,6 +124,7 @@ describe('GET /api/samples', () => {
     const list = await (await app.request('/api/samples')).json();
     expect(list.map((s: { name: string }) => s.name).sort()).toEqual([
       'equipment_dairy_meat.csv',
+      'hygiene_audits.csv',
       'inspection_dairy_meat.csv',
       'production_dairy_meat.csv',
     ]);
@@ -131,6 +132,103 @@ describe('GET /api/samples', () => {
     expect(csv.split('\n')[0]).toContain('machine_id');
     expect((await app.request('/api/samples/..%2Fseed%2Fclaims.json')).status).toBe(404);
     expect((await app.request('/api/samples/other.csv')).status).toBe(404);
+  });
+});
+
+describe('POST /api/tools/*/preview — AI 없이 즉시 응답', () => {
+  it('생산지표: 코드 계산(통계·이상치)만 돌려주고 AI를 부르지 않는다', async () => {
+    const { app, llm } = make([]);
+    const res = await post(app, '/api/tools/production/preview', {});
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.stats.perLine).toHaveLength(3);
+    expect(json.stats.flagged).toHaveLength(5);
+    expect(json.ai).toBeUndefined();
+    expect(llm.calls).toHaveLength(0);
+  });
+
+  it('설비 진단: 위험도 순 분석만 돌려준다', async () => {
+    const { app, llm } = make([]);
+    const json = await (await post(app, '/api/tools/equipment/preview', {})).json();
+    expect(json.analysis.machines[0]).toMatchObject({ machine_id: 'TUM-01', risk: 'high' });
+    expect(json.ai).toBeUndefined();
+    expect(llm.calls).toHaveLength(0);
+  });
+
+  it('검사 이상 탐지: 관리도용 점 데이터까지 포함해서 돌려준다', async () => {
+    const { app, llm } = make([]);
+    const json = await (await post(app, '/api/tools/inspection/preview', {})).json();
+    expect(json.analysis.series[0]).toMatchObject({ key: '햄|중량', risk: 'high' });
+    expect(json.analysis.series[0].points).toHaveLength(91);
+    expect(llm.calls).toHaveLength(0);
+  });
+
+  it('미리보기도 CSV 형식 오류를 똑같이 안내한다', async () => {
+    const { app } = make([]);
+    for (const tool of ['production', 'equipment', 'inspection']) {
+      const res = await post(app, `/api/tools/${tool}/preview`, { csv: 'a,b\n1,2' });
+      expect(res.status, tool).toBe(400);
+      expect((await res.json()).error.message, tool).toContain('필요한 컬럼');
+    }
+  });
+
+  it('미리보기 결과는 전체 결과의 코드 계산 부분과 같다 (화면에서 먼저 보여준 값이 바뀌지 않는다)', async () => {
+    const ai = { headline: '요약 문장입니다 열자 이상', findings: [], report_markdown: '# 보고서 본문' };
+    const { app } = make([ai]);
+    const pre = await (await post(app, '/api/tools/production/preview', {})).json();
+    const full = await (await post(app, '/api/tools/production', {})).json();
+    expect(full.stats).toEqual(pre.stats);
+  });
+});
+
+describe('POST /api/tools/hygiene — 위생점검 분석', () => {
+  const assess = (plant: string) => ({
+    plant, summary: `${plant} 상황 요약`, probable_causes: ['기록 담당 공백(추정)'],
+    actions: [{ action: '점검표 재교육', urgency: 'within_week', owner: '품질보증팀' }],
+  });
+  const ai = {
+    headline: '안양공장 알레르기 원료 보관 기한 초과가 가장 시급',
+    plant_assessments: [assess('안양공장'), assess('음성공장'), assess('평택공장'), assess('없는공장')],
+    systemic_actions: ['포충등 관리 기록 양식 통일'],
+    next_audit_focus: [
+      { plant: '안양공장', item: '원료 보관 구분(알레르기)', reason: '기한 초과' },
+      { plant: '음성공장', item: '창고 조명 밝기', reason: '지어낸 항목' },
+    ],
+    report_markdown: '# 6월 위생점검 결과 보고서\n\n' + '본문 '.repeat(60),
+  };
+
+  it('미리보기: 코드 집계만 즉시 돌려주고 AI를 부르지 않는다', async () => {
+    const { app, llm } = make([]);
+    const json = await (await post(app, '/api/tools/hygiene/preview', {})).json();
+    expect(json.analysis.overdue).toHaveLength(1);
+    expect(json.analysis.recurring).toHaveLength(2);
+    expect(llm.calls).toHaveLength(0);
+  });
+
+  it('전체: 없는 공장의 평가는 버리고, 점검표에 없는 중점 항목은 verified=false', async () => {
+    const { app, llm } = make([ai]);
+    const res = await post(app, '/api/tools/hygiene', {});
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.ai.plant_assessments.map((x: { plant: string }) => x.plant)).toEqual(['안양공장', '음성공장', '평택공장']);
+    expect(json.unknown_plants_dropped).toBe(1);
+    expect(json.ai.next_audit_focus.map((f: { verified: boolean }) => f.verified)).toEqual([true, false]);
+    expect(llm.calls[0]!.prompt).toContain('포충등 관리 기록');
+  });
+
+  it('위험 공장(3곳) 평가가 모자란 응답은 거절하고 다시 받는다', async () => {
+    const short = { ...ai, plant_assessments: [assess('안양공장')] };
+    const { app, llm } = make([short, ai]);
+    expect((await post(app, '/api/tools/hygiene', {})).status).toBe(200);
+    expect(llm.calls).toHaveLength(2);
+    expect(llm.calls[1]!.prompt).toContain('3개 공장 모두');
+  });
+
+  it('다른 형식 CSV는 필요한 컬럼을 안내한다', async () => {
+    const { app } = make([]);
+    const res = await post(app, '/api/tools/hygiene/preview', { csv: 'a,b\n1,2' });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.message).toContain('result');
   });
 });
 
@@ -421,10 +519,77 @@ describe('POST /api/tools/regulation', () => {
     expect(json.unknown_products_dropped).toBe(1);
   });
 
+  it('AI가 인용문 앞에 "제1조:" 같은 조 표시를 붙여도 본문이 같으면 일치로 본다 (실제로 겪은 오탐)', async () => {
+    const quote = '스프류에 사용하는 보존료의 사용량은 최종 제품 기준 1.0g/kg 이하로 한다';
+    const { app } = make([{ summary: 's', general_actions: [], impacts: [
+      impact({ quoted_text: `제1조: ${quote}` }),
+      impact({ quoted_text: `[제1조] ${quote}` }),
+      impact({ article_no: '제 1 조', quoted_text: quote }),
+    ] }]);
+    const json = await (await post(app, '/api/tools/regulation', { regulation_id: 'R-001' })).json();
+    expect(json.impacts.map((i: { citation_verified: boolean }) => i.citation_verified)).toEqual([true, true, true]);
+  });
+
+  it('조 번호에 제목 괄호가 붙어 있어도("제1조(목적)") 같은 조로 대조한다', async () => {
+    const { app } = make([{ summary: 's', general_actions: [], impacts: [
+      impact({ article_no: '제1조', quoted_text: '이 고시는 면류 기준을 정한다' }),
+    ] }]);
+    const custom = { text: '제1조(목적) 이 고시는 면류 기준을 정한다.' };
+    const json = await (await post(app, '/api/tools/regulation', { custom })).json();
+    expect(json.impacts[0].citation_verified).toBe(true);
+  });
+
+  it('영향 없음(none) 품목이 인용을 비우면 "해당 없음"(null)으로 표시한다', async () => {
+    const { app } = make([{ summary: 's', general_actions: [], impacts: [
+      impact({ product_id: 'P-OIL', level: 'none', quoted_text: '' }),
+      impact({ product_id: 'P-SAUCE', level: 'none', quoted_text: '지어낸 문장' }),
+    ] }]);
+    const json = await (await post(app, '/api/tools/regulation', { regulation_id: 'R-001' })).json();
+    expect(json.impacts.map((i: { citation_verified: boolean | null }) => i.citation_verified)).toEqual([null, false]);
+  });
+
+  it('조 표시를 떼고 나서도 내용이 다르면 여전히 불일치', async () => {
+    const { app } = make([{ summary: 's', general_actions: [], impacts: [impact({ quoted_text: '제1조: 보존료를 전면 금지한다' })] }]);
+    const json = await (await post(app, '/api/tools/regulation', { regulation_id: 'R-001' })).json();
+    expect(json.impacts[0].citation_verified).toBe(false);
+  });
+
   it('조문 번호가 틀리면 인용 검증 실패', async () => {
     const { app } = make([{ summary: 's', impacts: [impact({ article_no: '제9조' })], general_actions: [] }]);
     const json = await (await post(app, '/api/tools/regulation', { regulation_id: 'R-001' })).json();
     expect(json.impacts[0].citation_verified).toBe(false);
+  });
+
+  it('붙여넣은 조문도 조 단위로 나눠 분석하고, 인용은 붙여넣은 원문과 대조한다', async () => {
+    const custom = {
+      title: '직접 붙인 고시',
+      effective_date: '2027-05-01',
+      text: '제1조(목적) 이 고시는 면류 기준을 정한다.\n제2조 유탕면 스프의 나트륨은 1회 제공량당 1500mg 이하로 한다.',
+    };
+    const { app, llm } = make([
+      {
+        summary: '나트륨 기준 강화',
+        impacts: [
+          impact({ article_no: '제2조', quoted_text: '유탕면 스프의 나트륨은 1회 제공량당 1500mg 이하로 한다' }),
+          impact({ product_id: 'P-SAUCE', article_no: '제2조', quoted_text: '소스의 나트륨도 제한한다' }),
+        ],
+        general_actions: [],
+      },
+    ]);
+    const res = await post(app, '/api/tools/regulation', { custom });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.regulation_id).toBe('CUSTOM');
+    expect(json.impacts.map((i: { citation_verified: boolean }) => i.citation_verified)).toEqual([true, false]);
+    expect(llm.calls[0]!.prompt).toContain('1500mg');
+    expect(llm.calls[0]!.prompt).toContain('직접 붙인 고시');
+  });
+
+  it('붙여넣은 조문 검증: 빈 내용·잘못된 시행일은 400, 아무것도 없으면 400', async () => {
+    const { app } = make([]);
+    expect((await post(app, '/api/tools/regulation', { custom: { text: '  ' } })).status).toBe(400);
+    expect((await post(app, '/api/tools/regulation', { custom: { text: '제1조 가', effective_date: '내년' } })).status).toBe(400);
+    expect((await post(app, '/api/tools/regulation', {})).status).toBe(400);
   });
 
   it('없는 법규 id는 404', async () => {

@@ -6,6 +6,7 @@ import { ArrowRight, BrandMark, RoleIcon } from './icons';
 import { ROLES, type Role, type RoleId, type ToolId } from './roles';
 import { ClaimTool } from './tools/ClaimTool';
 import { EquipmentTool } from './tools/EquipmentTool';
+import { HygieneTool } from './tools/HygieneTool';
 import { InspectionTool, NCR_PREFILL_EVENT } from './tools/InspectionTool';
 import { NcrTool } from './tools/NcrTool';
 import { ProductionTool } from './tools/ProductionTool';
@@ -22,6 +23,7 @@ const TOOL: Record<ToolId, () => React.JSX.Element> = {
   regulation: RegulationTool,
   claim: ClaimTool,
   supplier: SupplierReportTool,
+  hygiene: HygieneTool,
 };
 
 function readHash(): View {
@@ -41,7 +43,11 @@ export function App() {
   }, []);
 
   const go = (v: View) => {
-    window.location.hash = v === 'all' ? '' : v;
+    try {
+      window.location.hash = v === 'all' ? '' : v;
+    } catch {
+      /* 해시를 못 바꾸는 환경에서는 화면 상태만 바꾼다 */
+    }
     setView(v);
     window.scrollTo({ top: 0 });
   };
@@ -68,12 +74,17 @@ export function App() {
       </header>
 
       <div className="container">
+        {mode === 'artifact' && (
+          <div className="banner info">
+            <b>공개용 화면입니다.</b> 샘플 입력의 AI 결과는 <b>미리 실행해 둔 실제 Claude 응답</b>이고, 숫자 계산·관리도·검증은 지금 이 화면에서 다시 실행됩니다. 직접 입력한 내용은 Claude 사용을 허용하면 그 자리에서 분석합니다.
+          </div>
+        )}
         {mode === 'demo' && <div className="banner demo">데모 모드: 미리 준비된 가짜 응답을 보여줍니다. 실제 Claude 분석이 아닙니다.</div>}
         {mode === 'offline' && <div className="banner error">서버에 연결할 수 없습니다. npm run dev:server 를 실행했는지 확인하세요.</div>}
         <main>{role ? <RoleView key={role.id} role={role} onBack={() => go('all')} /> : <Overview onPick={go} />}</main>
       </div>
 
-      <footer className="container footer">가상의 식품회사 데이터로 만든 시연용 서비스입니다 · 로컬 Claude 인증 사용 · AI 결과는 초안이며 최종 판단은 담당자가 합니다</footer>
+      <footer className="container footer">가상의 식품회사 데이터로 만든 시연용 서비스입니다{mode === 'artifact' ? '' : ' · 로컬 Claude 인증 사용'} · AI 결과는 초안이며 최종 판단은 담당자가 합니다</footer>
     </div>
   );
 }

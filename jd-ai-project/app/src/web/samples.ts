@@ -1,4 +1,4 @@
-export type SampleTool = 'production' | 'equipment' | 'inspection';
+export type SampleTool = 'production' | 'equipment' | 'inspection' | 'hygiene';
 
 export interface SampleEntry {
   key: string;
@@ -17,6 +17,7 @@ export const SAMPLE_CATALOG: SampleEntry[] = [
   { key: 'production_dairy_meat.csv', tool: 'production', label: '유가공·육가공 6월 생산 실적', url: '/api/samples/production_dairy_meat.csv' },
   { key: 'equipment_dairy_meat.csv', tool: 'equipment', label: '유가공·육가공 설비 센서 6개월', url: '/api/samples/equipment_dairy_meat.csv' },
   { key: 'inspection_dairy_meat.csv', tool: 'inspection', label: '유가공·육가공 검사 성적 3개월', url: '/api/samples/inspection_dairy_meat.csv' },
+  { key: 'hygiene_audits.csv', tool: 'hygiene', label: '3개 공장 위생점검 기록 6개월', url: '/api/samples/hygiene_audits.csv' },
 ];
 
 export const samplesFor = (tool: SampleTool) => SAMPLE_CATALOG.filter((s) => s.tool === tool);

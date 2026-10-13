@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { SupplierReportResult, SupplierTone } from '../../server/application/tools';
 import type { Supplier, SupplierCase } from '../../server/domain/seed';
 import { api } from '../api';
-import { Badge, CopyButton, Disclaimer, RunStatus, useRun } from '../ui';
+import { Badge, CopyButton, Disclaimer, metaOf, RunStatus, useRun } from '../ui';
 
 const TONES: Array<{ id: SupplierTone; name: string; desc: string }> = [
   { id: 'inform', name: '상황 공유·협조 요청', desc: '협력적인 어조. 확정 전이라 자료 공유와 의견을 구합니다.' },
@@ -21,7 +21,7 @@ export function SupplierReportTool() {
   const [tone, setTone] = useState<SupplierTone>('request_action');
   const [days, setDays] = useState(5);
   const [listState, setListState] = useState<'loading' | 'ok' | string>('loading');
-  const { loading, error, data, run } = useRun<SupplierReportResult>();
+  const { loading, error, cancelled, data, run, cancel } = useRun<SupplierReportResult>();
 
   useEffect(() => {
     Promise.all([api<SupplierCase[]>('/api/seed/supplier_cases'), api<Supplier[]>('/api/seed/suppliers')])
@@ -112,11 +112,11 @@ export function SupplierReportTool() {
             {[3, 5, 7, 10].map((d) => <option key={d} value={d}>접수 후 {d}영업일 이내</option>)}
           </select>
         </label>
-        <button disabled={loading || !supplierId || text.trim().length === 0} onClick={() => run(() => api<SupplierReportResult>('/api/tools/supplier_report', { supplier_id: supplierId, text, tone, deadline_days: days }))}>
+        <button disabled={loading || !supplierId || text.trim().length === 0} onClick={() => run((signal) => api<SupplierReportResult>('/api/tools/supplier_report', { supplier_id: supplierId, text, tone, deadline_days: days }, signal))}>
           공문 초안 만들기
         </button>
       </div>
-      <RunStatus loading={loading} error={error} />
+      <RunStatus loading={loading} error={error} cancelled={cancelled} onCancel={cancel} typical="30~50초" />
 
       {data && <Result data={data} supplierName={supplier?.name ?? ''} />}
     </section>
@@ -235,7 +235,7 @@ function Result({ data, supplierName }: { data: SupplierReportResult; supplierNa
 
       <div className="row between"><h4>공문 본문 (초안)</h4><CopyButton text={data.letter_markdown} /></div>
       <pre className="doc">{data.letter_markdown}</pre>
-      <Disclaimer />
+      <Disclaimer meta={metaOf(data)} />
     </div>
   );
 }
