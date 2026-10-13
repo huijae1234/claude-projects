@@ -25,9 +25,10 @@ const esc = (s) =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const fmt = (n) => (Math.round(n * 10) / 10).toString();
 
-// 캐릭터: 결과에 따라 우산 상태와 말풍선이 바뀜
+// 캐릭터: 우산 상태·말풍선은 추천 결과(level)를, 표정과 몸짓은 날씨(category)를 따른다
 const mascotEl = $('mascot');
 const bubbleEl = $('mascot-bubble');
+const bubbleShapeEl = $('mascot-bubble-shape');
 const MASCOT = {
   thinking: ['thinking', '쓸까? 말까?'],
   home: ['closed', '집에 있자… 🏠'],
@@ -38,10 +39,34 @@ const MASCOT = {
   none: ['closed', '안 써도 돼! 😎'],
 };
 
-function setMascot(key) {
-  const [state, text] = MASCOT[key] ?? MASCOT.thinking;
-  mascotEl.setAttribute('class', `mascot ${state}`);
+// 날씨 -> 캐릭터 모습. 맑음·더움: 땀 흘리며 힘듦 / 비: 방긋 신남 / 흐림: 해먹에서 휘파람. 나머지(눈·추움)는 원래 모습.
+const MOODS = { clear: 'sweat', hot: 'sweat', cloudy: 'hammock', drizzle: 'joy', rain: 'joy', storm: 'joy' };
+const MOOD_LABEL = {
+  neutral: '우산을 쓸까 말까 고민하는 빗방울 캐릭터',
+  sweat: '더워서 땀을 뻘뻘 흘리며 힘들어하는 빗방울 캐릭터',
+  joy: '비가 와서 방긋 웃으며 신나하는 빗방울 캐릭터',
+  hammock: '해먹에 누워 천진난만하게 휘파람을 부는 빗방울 캐릭터',
+};
+const MOOD_TEXT = { sweat: '으아 더워… 💦', hammock: '휘이~ ♪ 편하다~' };
+const JOY_TEXT = { home: '집에서 구경!', raincoat: '우비 첨벙! 🧥', long: '장우산 신나!', folding: '접이식 신나!', hood: '후드로 첨벙!', none: '비다 비~! 🎶' };
+let currentMood = 'neutral'; // render()가 날씨 카테고리로 정한다
+
+// 말풍선 크기를 글자 길이에 맞춘다
+function fitBubble() {
+  const w = bubbleEl.getComputedTextLength?.() ?? 80;
+  const rx = Math.min(64, Math.max(46, w / 2 + 14));
+  bubbleShapeEl.setAttribute('rx', rx);
+  bubbleShapeEl.setAttribute('cx', rx + 4);
+  bubbleEl.setAttribute('x', rx + 4);
+}
+
+function setMascot(key, mood = 'neutral') {
+  const [state, advice] = MASCOT[key] ?? MASCOT.thinking;
+  const text = key === 'thinking' ? advice : MOOD_TEXT[mood] ?? (mood === 'joy' ? JOY_TEXT[key] : null) ?? advice;
+  mascotEl.setAttribute('class', `mascot ${state} mood-${mood}`);
+  mascotEl.setAttribute('aria-label', MOOD_LABEL[mood]);
   bubbleEl.textContent = text;
+  fitBubble();
 }
 
 // 날씨 카테고리 -> 배경(맑음/흐림/비/눈) + 비·눈 입자 생성
@@ -109,7 +134,7 @@ async function showPlace(place) {
     const summary = await fetchWeather(place.lat, place.lon);
     const advice = getAdvice(summary);
     render(place, summary, advice);
-    setMascot(advice.level);
+    setMascot(advice.level, currentMood);
     savePlace(place);
     setStatus('');
   } catch (err) {
@@ -177,6 +202,7 @@ function render(place, s, advice) {
   const moonReport = getMoonReport(moon, s.night);
   document.body.dataset.tone = advice.tone;
   setScene(category);
+  currentMood = MOODS[category] ?? 'neutral';
 
   const card = (label, item) => `
     <div class="check">

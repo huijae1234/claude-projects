@@ -51,6 +51,55 @@ h1 { margin: 0; font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; }
 }
 .mascot .eyes { animation: blink 4s infinite; transform-origin: 100px 140px; }
 @keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
+/* 날씨에 따라 바뀌는 모습(mood)
+   sweat   = 맑음·더움: 땀 흘리며 헉헉
+   joy     = 비: 방긋 웃으며 신나게 폴짝
+   hammock = 흐림: 해먹에 누워 휘파람
+   neutral = 그 외(눈·추움·불러오는 중): 원래 모습 */
+.mascot .face, .mascot .extras, .mascot .heat, .mascot .pose-hammock { display: none; }
+.mascot.mood-neutral .face-neutral,
+.mascot.mood-sweat .face-sweat,
+.mascot.mood-joy .face-joy,
+.mascot.mood-sweat .extras-sweat, .mascot.mood-sweat .heat,
+.mascot.mood-joy .extras-joy,
+.mascot.mood-hammock .pose-hammock { display: inline; }
+.mascot.mood-hammock .body, .mascot.mood-hammock .shadow { display: none; }
+
+/* 더워서 헉헉: 몸이 늘어졌다 줄었다, 땀방울이 주르륵 */
+.mascot.mood-sweat .body { animation: pant 0.9s ease-in-out infinite; }
+@keyframes pant {
+  0%, 100% { transform: translateY(0) scale(1, 1) rotate(-2deg); }
+  50% { transform: translateY(2px) scale(1.04, 0.94) rotate(2deg); }
+}
+.mascot .sd { animation: sweat 1.8s ease-in infinite; }
+@keyframes sweat {
+  0% { opacity: 0; transform: translateY(-4px); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(28px); }
+}
+
+/* 비라서 신남: 폴짝폴짝, 반짝이 */
+.mascot.mood-joy .body { animation: joyjump 0.72s ease-in-out infinite; }
+@keyframes joyjump {
+  0%, 100% { transform: translateY(0) scale(1.05, 0.95) rotate(-2deg); }
+  50% { transform: translateY(-16px) scale(0.97, 1.04) rotate(2deg); }
+}
+.mascot .sp { animation: twinkle 1.1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.4); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* 흐림: 해먹이 살랑살랑, 휘파람 음표가 떠오름 */
+.mascot .hammock-all { animation: hammock-sway 3.4s ease-in-out infinite alternate; transform-origin: 125px 70px; }
+@keyframes hammock-sway { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+.mascot .note { animation: note-rise 2.6s ease-out infinite; }
+@keyframes note-rise {
+  0% { opacity: 0; transform: translate(0, 8px); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(16px, -32px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mascot *, .mascot { animation: none !important; }
   .mascot.thinking .closed-umb { opacity: 1; }
