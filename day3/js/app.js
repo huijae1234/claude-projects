@@ -24,6 +24,8 @@ const DEFAULT_PLACE = { name: '서울', region: '대한민국', lat: 37.566, lon
 const esc = (s) =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const fmt = (n) => (Math.round(n * 10) / 10).toString();
+// 큰 숫자용: 반올림한 정수 + 진짜 마이너스 기호 (Math.round(-0.4)는 -0 이라 "0"으로 찍힌다)
+const deg = (n) => String(Math.round(n) || 0).replace('-', '−');
 
 // 캐릭터: 우산 상태·말풍선은 추천 결과(level)를, 표정과 몸짓은 날씨(category)를 따른다
 const mascotEl = $('mascot');
@@ -215,9 +217,12 @@ function render(place, s, advice) {
   resultEl.innerHTML = `
     <div class="hero">
       <div class="place">${esc(place.name)}${place.region ? ` <span>${esc(place.region)}</span>` : ''}</div>
-      <div class="hero-icon">${weather.icon}</div>
+      <div class="hero-main">
+        <div class="temp">${deg(s.temp)}<i>°</i></div>
+        <div class="hero-icon">${weather.icon}</div>
+      </div>
+      <p class="weather-line">${esc(weather.label)}<span>체감 ${deg(s.feels)}°</span></p>
       <h2>${esc(advice.headline)}</h2>
-      <p class="weather-line">${esc(weather.label)} · ${fmt(s.temp)}° (체감 ${fmt(s.feels)}°)</p>
       <p class="reasons">${advice.reasons.map(esc).join('<br>')}</p>
       <p class="reasons-sub">앞으로 12시간 기준</p>
     </div>
@@ -229,16 +234,17 @@ function render(place, s, advice) {
     </div>
 
     <div class="stats">
-      <div><span>🌡 기온</span><b>${fmt(s.temp)}°</b><small>체감 ${fmt(s.feels)}° · ${range(s.minTemp, s.maxTemp, '°')}</small></div>
-      <div><span>💧 습도</span><b>${Math.round(s.humidity)}%</b><small>${humidityLabel(s.humidity)}</small></div>
-      <div><span>💨 바람</span><b>${fmt(s.maxWind)}m/s</b><small>${windLabel(s.maxWind)} · 돌풍 ${fmt(s.maxGust)}</small></div>
+      <div><span>🌡 기온</span><b>${fmt(s.temp)}<i>°</i></b><small>체감 ${fmt(s.feels)}° · ${range(s.minTemp, s.maxTemp, '°')}</small></div>
+      <div><span>💧 습도</span><b>${Math.round(s.humidity)}<i>%</i></b><small>${humidityLabel(s.humidity)}</small></div>
+      <div><span>💨 바람</span><b>${fmt(s.maxWind)}<i>m/s</i></b><small>${windLabel(s.maxWind)} · 돌풍 ${fmt(s.maxGust)}</small></div>
     </div>
 
     <div class="outfit">
       <div class="outfit-head">
         <div class="outfit-icon">${outfit.sleeve.icon}</div>
         <div>
-          <h3>👗 오늘의 옷차림: ${esc(outfit.sleeve.title)}</h3>
+          <div class="eyebrow">오늘의 옷차림</div>
+          <h3>${esc(outfit.sleeve.title)}</h3>
           <p>${esc(outfit.sleeve.desc)} <span class="muted">(체감 ${fmt(outfit.base)}° 기준)</span></p>
         </div>
       </div>
@@ -257,8 +263,9 @@ function render(place, s, advice) {
       <div class="moon-head">
         <div class="moon-icon">${moon.icon}</div>
         <div>
-          <h3>오늘 밤 달 · ${esc(moon.name)}</h3>
-          <p class="moon-pct">밝기 약 <b>${moon.illumination}%</b> <span>(보름달 = 100%)</span></p>
+          <div class="eyebrow">오늘 밤 달</div>
+          <h3>${esc(moon.name)}</h3>
+          <p class="moon-pct">밝기 약 <b>${moon.illumination}<i>%</i></b> <span>(보름달 = 100%)</span></p>
         </div>
       </div>
       <div class="moon-meter"><i style="width:${moon.illumination}%"></i></div>
